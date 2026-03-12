@@ -13,6 +13,7 @@
     "@gsap/react": "^2.1.2",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
+    "aos": "^2.3.4",
     "axios": "^1.13.6",
     "framer-motion": "^12.35.2",
     "gsap": "^3.14.2",
@@ -21,6 +22,7 @@
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.13.1",
     "react-toastify": "^11.0.5",
+    "split-type": "^0.3.4",
     "three": "^0.183.2"
   },
   "devDependencies": {

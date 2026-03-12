@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-  background-color: #F8FAFC; /* Slightly cooler soft background */
+  background-color: #F8FAFC; 
   color: #0F172A;
   font-family: 'Inter', system-ui, sans-serif;
   overflow-x: hidden;
@@ -26,38 +26,21 @@ body {
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
 }
 
-/* Ambient Background Blobs Animation */
+/* Ambient Background Animations */
 @keyframes blob {
   0% { transform: translate(0px, 0px) scale(1); }
   33% { transform: translate(30px, -50px) scale(1.1); }
   66% { transform: translate(-20px, 20px) scale(0.9); }
   100% { transform: translate(0px, 0px) scale(1); }
 }
-.animate-blob {
-  animation: blob 7s infinite;
-}
-.animation-delay-2000 {
-  animation-delay: 2s;
-}
-.animation-delay-4000 {
-  animation-delay: 4s;
-}
-
-@keyframes shimmer {
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-.animate-shimmer {
-  animation: shimmer 1.5s infinite;
-}
+.animate-blob { animation: blob 7s infinite; }
+.animation-delay-2000 { animation-delay: 2s; }
+.animation-delay-4000 { animation-delay: 4s; }
 
 @keyframes marquee {
   0% { transform: translateX(0); }
   100% { transform: translateX(calc(-50% - 1rem)); }
 }
-
 .animate-marquee {
   display: flex;
   width: max-content;
@@ -69,7 +52,6 @@ body {
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
-
 .animate-gradient {
   background-size: 200% 200%;
   animation: gradient-flow 6s ease infinite;
@@ -78,7 +60,172 @@ body {
 @keyframes shimmer {
   100% { transform: translateX(100%); }
 }
-
 .animate-shimmer {
   animation: shimmer 2s infinite;
+}
+
+/* SVG Wave Animations */
+@keyframes move-forever {
+  0% { transform: translate3d(-90px, 0, 0); }
+  100% { transform: translate3d(85px, 0, 0); }
+}
+.animate-wave1 > use { animation: move-forever 4s cubic-bezier(.55, .5, .45, .5) infinite; }
+.animate-wave2 > use { animation: move-forever 6s cubic-bezier(.55, .5, .45, .5) infinite; }
+.animate-wave3 > use { animation: move-forever 8s cubic-bezier(.55, .5, .45, .5) infinite; }
+
+/* ========================================================
+   ATTRACTIVE BUTTON 1: BLOB LIQUID EFFECT (Learn More)
+   ======================================================== */
+.blob-btn {
+  z-index: 1;
+  position: relative;
+  background-color: transparent;
+  outline: none;
+  border: none;
+  transition: all 0.4s ease;
+  cursor: pointer;
+  border-radius: 30px;
+}
+
+/* The initial border - Changed to Brand Blue */
+.blob-btn:before {
+  content: "";
+  z-index: 1;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  border: 2px solid #0A7294; /* Blue Border */
+  border-radius: 30px;
+  transition: border-color 0.3s ease;
+}
+
+.blob-btn:after {
+  content: "";
+  z-index: -2;
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  width: 100%;
+  height: 100%;
+  transition: all 0.3s 0.2s;
+  border-radius: 30px;
+}
+
+/* Hover State - Lifts up and casts a blue glow */
+.blob-btn:hover {
+  color: #FFFFFF !important;
+  transform: translateY(-3px);
+  box-shadow: 0 12px 25px -8px rgba(10, 114, 148, 0.6);
+}
+
+.blob-btn:hover:before {
+  border-color: transparent; /* Hides border smoothly when liquid fills */
+}
+
+.blob-btn:hover:after {
+  transition: all 0.3s;
+  left: 0;
+  top: 0;
+}
+
+.blob-btn__inner {
+  z-index: -1;
+  overflow: hidden;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 30px;
+  background: #ffffff;
+}
+
+.blob-btn__blobs {
+  position: relative;
+  display: block;
+  height: 100%;
+  filter: url('#goo');
+}
+
+/* The Liquid Fill - Changed to Brand Blue */
+.blob-btn__blob {
+  position: absolute;
+  top: 2px;
+  width: 25%;
+  height: 100%;
+  background: #0A7294; /* Blue Liquid */
+  border-radius: 100%;
+  transform: translate3d(0, 150%, 0) scale(1.7);
+  transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1); /* Smoother elastic physics */
+}
+
+@supports(filter: url('#goo')) {
+  .blob-btn__blob {
+    transform: translate3d(0, 150%, 0) scale(1.4);
+  }
+}
+
+.blob-btn__blob:nth-child(1) { left: 0%; transition-delay: 0s; }
+.blob-btn__blob:nth-child(2) { left: 30%; transition-delay: 0.06s; }
+.blob-btn__blob:nth-child(3) { left: 60%; transition-delay: 0.12s; }
+.blob-btn__blob:nth-child(4) { left: 90%; transition-delay: 0.18s; }
+
+.blob-btn:hover .blob-btn__blob {
+  transform: translateZ(0) scale(1.7);
+}
+
+@supports(filter: url('#goo')) {
+  .blob-btn:hover .blob-btn__blob {
+    transform: translateZ(0) scale(1.4);
+  }
+}
+
+/* ========================================================
+   ATTRACTIVE BUTTON 2: SONAR RIPPLE EFFECT (Explore)
+   ======================================================== */
+.btn-ripple {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  background-color: #fff;
+  border: 1px solid #e2e8f0;
+  z-index: 1;
+}
+
+.btn-ripple:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 25px -5px rgba(34, 179, 173, 0.2); /* Soft Teal Glow */
+  color: #0A7294;
+  border-color: #22B3AD;
+}
+
+.btn-ripple:active {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 10px rgba(34, 179, 173, 0.1);
+}
+
+/* The expanding ring effect */
+.btn-ripple::after {
+  content: "";
+  display: inline-block;
+  height: 100%;
+  width: 100%;
+  border-radius: 100px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  border: 2px solid #22B3AD; /* Teal expanding ring */
+  opacity: 0;
+}
+
+/* Triggers a continuous sonar pulse on hover */
+.btn-ripple:hover::after {
+  animation: sonarPulse 1.2s ease-out infinite;
+}
+
+@keyframes sonarPulse {
+  0% { transform: scaleX(1) scaleY(1); opacity: 0.6; }
+  100% { transform: scaleX(1.3) scaleY(1.5); opacity: 0; }
 }
