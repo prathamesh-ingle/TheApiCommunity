@@ -13,6 +13,8 @@ import AboutPage from "./pages/AboutPage";
 import TeamPage from "./pages/TeamPage";
 import SpeakersPage from "./pages/SpeakersPage";
 
+//Admin pages
+import LoginPage from './pages/admin/LoginPage';
 //admin
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminLayout from './layouts/AdminLayout';
@@ -47,6 +49,8 @@ const PublicLayout = () => {
 };
 
 function App() {
+  const location=useLocation();
+  location.pathname.startsWith("/admin");
   return (
     <>
       {/* ScrollToTop helper ensures every new page starts at the top */}
@@ -60,6 +64,7 @@ function App() {
           <Route path="/speakers" element={<SpeakersPage />} />
           <Route path="/team" element={<TeamPage />} />
         </Route>
+        <Route path="/admin/login" element={<LoginPage/>}></Route>
 
         <Route path="/admin" element={<AdminLayout />}>
     <Route path="dashboard" element={<AdminDashboard />} />
