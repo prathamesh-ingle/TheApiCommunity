@@ -1,0 +1,60 @@
+{
+  "topRow": [
+    {
+      "id": 1,
+      "title": "Kotlin Conf 2024 Delhi NCR",
+      "tag": "Conference",
+      "imgUrl": "/1.jpg"
+    },
+    {
+      "id": 2,
+      "title": "Digital Ocean April Meetup 2025",
+      "tag": "Meetup",
+      "imgUrl": "/2.jpg"
+    },
+    {
+      "id": 3,
+      "title": "Build with AI: AI Camp Pune",
+      "tag": "Workshop",
+      "imgUrl": "/3.jpg"
+    },
+    {
+      "id": 4,
+      "title": "Dev Day Pune Dev Fusion Cohort 2024",
+      "tag": "Meetup",
+      "imgUrl": "/4.jpg"
+    },
+    {
+      "id": 5,
+      "title": "AI Agents unplugged : Think. Build. Deploy",
+      "tag": "Meetup",
+      "imgUrl": "/5.jpg"
+    }
+  ],
+  "bottomRow": [
+    {
+      "id": 6,
+      "title": "Global Open Source Summit",
+      "tag": "Summit",
+      "imgUrl": "/6.jpg"
+    },
+    {
+      "id": 7,
+      "title": "Hacktober Fest Pune Fusion 2024",
+      "tag": "Workshop",
+      "imgUrl": "/7.jpg"
+    },
+    {
+      "id": 8,
+      "title": "Kotlin Conf 2024 Delhi NCR",
+      "tag": "Conference",
+      "imgUrl": "/8.jpg"
+    },
+    {
+      "id": 9,
+      "title": "The Supermove Tour - Pune 2024",
+      "tag": "Tour",
+      "imgUrl": "/9.jpg"
+    }
+  ]
+}

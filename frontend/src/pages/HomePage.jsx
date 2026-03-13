@@ -1,5 +1,4 @@
-// frontend/src/pages/HomePage.jsx
-import { useEffect, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { motion, useMotionValue, useTransform, animate as framerAnimate } from 'framer-motion';
 import gsap from 'gsap';
 import SplitType from 'split-type'; 
@@ -37,12 +36,101 @@ const dropWaveAnim = (delay = 0) => ({
   transition: { duration: 4.5, delay, repeat: Infinity, ease: "easeOut" } 
 });
 
+// --- PREMIUM STAT CARD WITH GLOWING HOVER BORDER ---
+const StatCard = ({ title, value, subtext, subtextColor, delay, hoverGradient, glowColor }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 30 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, margin: "-50px" }}
+    transition={{ duration: 0.6, delay, ease: "easeOut" }}
+    className="group relative p-[2px] rounded-[2rem] bg-slate-100 hover:-translate-y-2 transition-all duration-500 hover:shadow-[0_20px_40px_-10px_rgba(10,114,148,0.15)] cursor-default"
+  >
+    {/* Flowing Animated Gradient Border */}
+    <div className={`absolute inset-0 bg-gradient-to-r ${hoverGradient} bg-[length:200%_auto] animate-gradient opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[2rem]`} />
+    
+    {/* Inner White Card */}
+    <div className="flex flex-col justify-center relative bg-white p-6 sm:p-7 rounded-[calc(2rem-2px)] h-full z-10 overflow-hidden transition-all duration-500">
+      
+      {/* Internal Hover Spotlight */}
+      <div className={`absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-bl ${glowColor} to-transparent rounded-full blur-3xl opacity-0 group-hover:opacity-20 transition-all duration-700 group-hover:translate-x-2 group-hover:translate-y-2`} />
+
+      <h4 className="relative z-10 text-[11px] font-extrabold text-slate-400 uppercase tracking-[0.15em] mb-4 group-hover:text-slate-600 transition-colors duration-300">
+        {title}
+      </h4>
+      <div className="relative z-10 text-4xl sm:text-5xl font-black text-slate-900 tracking-tighter mb-4 flex items-baseline group-hover:scale-[1.03] origin-left transition-transform duration-500">
+        <AnimatedCounter from={0} to={value} />
+        <span className="text-[#0A7294] ml-1">+</span>
+      </div>
+      <div className={`relative z-10 text-[13px] font-semibold flex items-center gap-1.5 px-3 py-2 bg-slate-50/80 rounded-xl border border-slate-100 w-fit ${subtextColor} group-hover:bg-white group-hover:border-slate-200 transition-all duration-300`}>
+        {subtext}
+      </div>
+    </div>
+  </motion.div>
+);
+
+// --- FEATURE LIST ITEM WITH HOVER PHYSICS ---
+const FeatureItem = ({ icon: Icon, title, desc, delay }) => (
+  <motion.div
+    initial={{ opacity: 0, x: -20 }}
+    whileInView={{ opacity: 1, x: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.5, delay }}
+    whileHover={{ x: 8, backgroundColor: "#f8fafc" }}
+    className="flex items-start gap-4 p-4 rounded-2xl transition-all duration-300 border border-transparent hover:border-slate-100 hover:shadow-sm cursor-default"
+  >
+    <div className="mt-1 bg-gradient-to-br from-[#e0f2fe] to-[#bae6fd] p-2.5 rounded-full text-[#0A7294] shadow-inner transition-transform duration-300 hover:scale-110">
+      <Icon size={18} strokeWidth={2.5} />
+    </div>
+    <div>
+      <h4 className="text-lg font-bold text-slate-900">{title}</h4>
+      <p className="text-[15px] text-slate-500 font-medium leading-relaxed mt-1">
+        {desc}
+      </p>
+    </div>
+  </motion.div>
+);
+
+// --- ANTI-LAG GPU ACCELERATED EVENT CARD ---
+const EventCard = ({ imgUrl, title, tag }) => (
+  <div 
+    style={{ contain: 'paint layout', transform: 'translateZ(0)', WebkitBackfaceVisibility: 'hidden' }}
+    className="group relative w-[280px] sm:w-[340px] shrink-0 flex flex-col rounded-2xl bg-white border border-gray-200 shadow-sm overflow-hidden transition-all duration-300 hover:shadow-[0_20px_40px_-10px_rgba(10,114,148,0.15)] hover:-translate-y-2 cursor-pointer mx-3"
+  >
+    {/* Image Section */}
+    <div className="relative w-full h-[180px] overflow-hidden bg-slate-100">
+      <img 
+        src={imgUrl} 
+        alt={title} 
+        loading="lazy" 
+        decoding="async" 
+        style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
+        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-transparent opacity-70 pointer-events-none" />
+      
+      <div className="absolute top-4 left-4 z-10">
+        <span className="px-3 py-1.5 rounded-[0.4rem] bg-black/70 text-white text-[11px] font-semibold tracking-wide border border-white/20 transition-colors duration-300 group-hover:bg-[#0A7294]/90">
+          {tag}
+        </span>
+      </div>
+    </div>
+    
+    {/* Text Section */}
+    <div className="p-5 flex-grow bg-white flex items-center">
+      <h3 className="text-slate-800 font-semibold text-[16px] sm:text-[17px] leading-snug line-clamp-2 group-hover:text-[#0A7294] transition-colors">
+        {title}
+      </h3>
+    </div>
+  </div>
+);
+
 const HomePage = () => {
   const bgRef = useRef(null);
   const headingRef = useRef(null);
   const splitRef = useRef(null);
+  const [eventsData, setEventsData] = useState({ topRow: [], bottomRow: [] });
 
-  // --- INITIALIZE AOS ---
+  // --- INITIALIZE AOS & FETCH EVENTS ---
   useEffect(() => {
     AOS.init({
       duration: 700, 
@@ -51,11 +139,17 @@ const HomePage = () => {
       easing: 'ease-out-cubic', 
       offset: 50,    
     });
+    window.scrollTo(0, 0);
+
+    fetch('/events.json')
+      .then((response) => response.json())
+      .then((data) => setEventsData(data))
+      .catch((error) => console.error("Error loading events data:", error));
   }, []);
 
   // --- GSAP AMBIENT BACKGROUND & HOVER ANIMATIONS ---
   useGSAP(() => {
-    // 1. Grid Background Animation (Now works perfectly with inline styles)
+    // 1. Grid Background Animation
     gsap.to(".gsap-grid", { 
       backgroundPosition: "40px 40px", 
       duration: 20, 
@@ -129,10 +223,17 @@ const HomePage = () => {
 
   }, { scope: bgRef });
 
+  // --- SCROLL TO FORM FUNCTION ---
+  const scrollToForm = () => {
+    const formElement = document.getElementById("join-form");
+    if (formElement) {
+      formElement.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   const baseGlass = "gsap-hover-node bg-white/60 backdrop-blur-xl border border-white/80 transition-colors duration-300 hover:bg-white/90";
 
   return (
-    // FIX: Wrapped entire page in the bgRef so GSAP doesn't lose scope
     <div className="relative w-full bg-[#FCFCFD] font-sans overflow-x-hidden" ref={bgRef}>
       
       {/* ========================================== */}
@@ -148,12 +249,10 @@ const HomePage = () => {
 
         {/* --- UPGRADED 2D BACKGROUND --- */}
         <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-          {/* FIX: Added inline style for initial background position so GSAP can animate it */}
           <div 
             className="gsap-grid absolute inset-0 bg-[linear-gradient(to_right,#0A729415_1px,transparent_1px),linear-gradient(to_bottom,#0A729415_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_80%_60%_at_50%_0%,#000_100%,transparent_100%)]" 
             style={{ backgroundPosition: '0px 0px' }}
           />
-          
           <div className="gsap-orb-1 absolute top-[-5%] left-[-5%] h-[650px] w-[650px] rounded-full bg-gradient-to-br from-[#0A7294]/[0.08] to-transparent blur-[120px]" />
           <div className="gsap-orb-2 absolute bottom-[-5%] right-[-5%] h-[750px] w-[750px] rounded-full bg-gradient-to-tl from-[#22B3AD]/[0.09] to-transparent blur-[130px]" />
           <div className="absolute top-[30%] left-[40%] h-[500px] w-[500px] rounded-full bg-gradient-to-tr from-[#FF9A3D]/[0.05] to-transparent blur-[120px]" />
@@ -191,7 +290,11 @@ const HomePage = () => {
 
             <motion.div variants={itemVars} className="flex flex-col items-center gap-5 pt-4 sm:flex-row sm:justify-center lg:justify-start">
               
-              <button className="blob-btn group flex w-full sm:w-auto items-center justify-center gap-2 px-9 py-4 text-[15px] font-bold text-slate-900">
+              {/* --- CLICK HANDLER ADDED HERE --- */}
+              <button 
+                onClick={scrollToForm}
+                className="blob-btn group flex w-full sm:w-auto items-center justify-center gap-2 px-9 py-4 text-[15px] font-bold text-slate-900"
+              >
                 <Terminal className="h-4 w-4 relative z-10 transition-colors duration-300 group-hover:text-white" />
                 <span className="relative z-10">Join Community</span>
                 <span className="blob-btn__inner">
@@ -381,63 +484,81 @@ const HomePage = () => {
 
           <hr className="border-[#F4F4F5] mb-16" />
 
-          {/* Stats Grid */}
+         {/* Stats Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             
             {/* Stat Card 1 */}
-            <div data-aos="fade-up" data-aos-delay="0" className="flex flex-col relative bg-white p-7 sm:p-8 rounded-[2rem] border border-gray-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_16px_40px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#F0F9FF] mb-6">
-                <Activity strokeWidth={2} className="h-6 w-6 text-[#0284C7]" />
-              </div>
-              <div className="text-[11px] font-bold text-[#A1A1AA] tracking-[0.15em] uppercase mb-2">Daily API Calls</div>
-              <div className="text-[3.25rem] font-black text-[#0A0A0A] tracking-[-0.04em] leading-none mb-5">
-                15M<span className="text-[#0284C7]">+</span>
-              </div>
-              <div className="flex items-center mt-auto text-[13px] font-medium text-[#71717A] bg-gray-50/80 px-3 py-2 rounded-xl border border-gray-100 w-fit">
-                <Zap className="h-4 w-4 text-[#10B981] mr-1.5" fill="currentColor" />
-                <span className="text-[#10B981] font-bold mr-1.5">+18%</span> vs last week
+            <div data-aos="fade-up" data-aos-delay="0" className="group relative p-[2px] rounded-[2rem] hover:-translate-y-1 transition-all duration-300 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_16px_40px_rgba(0,0,0,0.08)]">
+              {/* The Hover Gradient Border */}
+              <div className="absolute inset-0 bg-gradient-to-r from-[#0284C7] to-[#22B3AD] rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              
+              {/* Inner White Card */}
+              <div className="flex flex-col relative bg-white p-7 sm:p-8 rounded-[calc(2rem-2px)] h-full z-10">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#F0F9FF] mb-6">
+                  <Activity strokeWidth={2} className="h-6 w-6 text-[#0284C7]" />
+                </div>
+                <div className="text-[11px] font-bold text-[#A1A1AA] tracking-[0.15em] uppercase mb-2">Daily API Calls</div>
+                <div className="text-[3.25rem] font-black text-[#0A0A0A] tracking-[-0.04em] leading-none mb-5">
+                  15M<span className="text-[#0284C7]">+</span>
+                </div>
+                <div className="flex items-center mt-auto text-[13px] font-medium text-[#71717A] bg-gray-50/80 px-3 py-2 rounded-xl border border-gray-100 w-fit">
+                  <Zap className="h-4 w-4 text-[#10B981] mr-1.5" fill="currentColor" />
+                  <span className="text-[#10B981] font-bold mr-1.5">+18%</span> vs last week
+                </div>
               </div>
             </div>
 
             {/* Stat Card 2 */}
-            <div data-aos="fade-up" data-aos-delay="100" className="flex flex-col relative bg-white p-7 sm:p-8 rounded-[2rem] border border-gray-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_16px_40px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#FAF5FF] mb-6">
-                <Globe strokeWidth={2} className="h-6 w-6 text-[#A855F7]" />
-              </div>
-              <div className="text-[11px] font-bold text-[#A1A1AA] tracking-[0.15em] uppercase mb-2">Active Regions</div>
-              <div className="text-[3.25rem] font-black text-[#0A0A0A] tracking-[-0.04em] leading-none mb-5">
-                120<span className="text-[#A855F7]">+</span>
-              </div>
-              <div className="mt-auto text-[13px] font-medium text-[#71717A] bg-gray-50/80 px-3 py-2 rounded-xl border border-gray-100 w-fit">
-                Edge-optimized delivery
+            <div data-aos="fade-up" data-aos-delay="100" className="group relative p-[2px] rounded-[2rem] hover:-translate-y-1 transition-all duration-300 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_16px_40px_rgba(0,0,0,0.08)]">
+              <div className="absolute inset-0 bg-gradient-to-r from-[#A855F7] to-[#ec4899] rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              
+              <div className="flex flex-col relative bg-white p-7 sm:p-8 rounded-[calc(2rem-2px)] h-full z-10">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#FAF5FF] mb-6">
+                  <Globe strokeWidth={2} className="h-6 w-6 text-[#A855F7]" />
+                </div>
+                <div className="text-[11px] font-bold text-[#A1A1AA] tracking-[0.15em] uppercase mb-2">Active Regions</div>
+                <div className="text-[3.25rem] font-black text-[#0A0A0A] tracking-[-0.04em] leading-none mb-5">
+                  120<span className="text-[#A855F7]">+</span>
+                </div>
+                <div className="mt-auto text-[13px] font-medium text-[#71717A] bg-gray-50/80 px-3 py-2 rounded-xl border border-gray-100 w-fit">
+                  Edge-optimized delivery
+                </div>
               </div>
             </div>
 
             {/* Stat Card 3 */}
-            <div data-aos="fade-up" data-aos-delay="200" className="flex flex-col relative bg-white p-7 sm:p-8 rounded-[2rem] border border-gray-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_16px_40px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#ECFDF5] mb-6">
-                <Shield strokeWidth={2} className="h-6 w-6 text-[#10B981]" />
-              </div>
-              <div className="text-[11px] font-bold text-[#A1A1AA] tracking-[0.15em] uppercase mb-2">System Uptime</div>
-              <div className="text-[3.25rem] font-black text-[#0A0A0A] tracking-[-0.04em] leading-none mb-5 flex items-baseline">
-                99.99<span className="text-3xl text-[#10B981] ml-1">%</span>
-              </div>
-              <div className="mt-auto text-[13px] font-medium text-[#71717A] bg-gray-50/80 px-3 py-2 rounded-xl border border-gray-100 w-fit">
-                Self-healing infrastructure
+            <div data-aos="fade-up" data-aos-delay="200" className="group relative p-[2px] rounded-[2rem] hover:-translate-y-1 transition-all duration-300 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_16px_40px_rgba(0,0,0,0.08)]">
+              <div className="absolute inset-0 bg-gradient-to-r from-[#10B981] to-[#3b82f6] rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              
+              <div className="flex flex-col relative bg-white p-7 sm:p-8 rounded-[calc(2rem-2px)] h-full z-10">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#ECFDF5] mb-6">
+                  <Shield strokeWidth={2} className="h-6 w-6 text-[#10B981]" />
+                </div>
+                <div className="text-[11px] font-bold text-[#A1A1AA] tracking-[0.15em] uppercase mb-2">System Uptime</div>
+                <div className="text-[3.25rem] font-black text-[#0A0A0A] tracking-[-0.04em] leading-none mb-5 flex items-baseline">
+                  99.99<span className="text-3xl text-[#10B981] ml-1">%</span>
+                </div>
+                <div className="mt-auto text-[13px] font-medium text-[#71717A] bg-gray-50/80 px-3 py-2 rounded-xl border border-gray-100 w-fit">
+                  Self-healing infrastructure
+                </div>
               </div>
             </div>
 
             {/* Stat Card 4 */}
-            <div data-aos="fade-up" data-aos-delay="300" className="flex flex-col relative bg-white p-7 sm:p-8 rounded-[2rem] border border-gray-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_16px_40px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#FFF7ED] mb-6">
-                <Cpu strokeWidth={2} className="h-6 w-6 text-[#F97316]" />
-              </div>
-              <div className="text-[11px] font-bold text-[#A1A1AA] tracking-[0.15em] uppercase mb-2">Builders Online</div>
-              <div className="text-[3.25rem] font-black text-[#0A0A0A] tracking-[-0.04em] leading-none mb-5">
-                10k<span className="text-[#F97316]">+</span>
-              </div>
-              <div className="mt-auto text-[13px] font-medium text-[#71717A] bg-gray-50/80 px-3 py-2 rounded-xl border border-gray-100 w-fit">
-                Pairing, shipping, scaling
+            <div data-aos="fade-up" data-aos-delay="300" className="group relative p-[2px] rounded-[2rem] hover:-translate-y-1 transition-all duration-300 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_16px_40px_rgba(0,0,0,0.08)]">
+              <div className="absolute inset-0 bg-gradient-to-r from-[#F97316] to-[#facc15] rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              
+              <div className="flex flex-col relative bg-white p-7 sm:p-8 rounded-[calc(2rem-2px)] h-full z-10">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#FFF7ED] mb-6">
+                  <Cpu strokeWidth={2} className="h-6 w-6 text-[#F97316]" />
+                </div>
+                <div className="text-[11px] font-bold text-[#A1A1AA] tracking-[0.15em] uppercase mb-2">Builders Online</div>
+                <div className="text-[3.25rem] font-black text-[#0A0A0A] tracking-[-0.04em] leading-none mb-5">
+                  10k<span className="text-[#F97316]">+</span>
+                </div>
+                <div className="mt-auto text-[13px] font-medium text-[#71717A] bg-gray-50/80 px-3 py-2 rounded-xl border border-gray-100 w-fit">
+                  Pairing, shipping, scaling
+                </div>
               </div>
             </div>
 
@@ -448,7 +569,8 @@ const HomePage = () => {
       {/* ========================================== */}
       {/* 3. PREMIUM "STAY CONNECTED" FORM SECTION   */}
       {/* ========================================== */}
-      <section className="w-full bg-[#FAFAFA] relative z-20 py-20 lg:py-32 font-sans border-t border-gray-100 overflow-hidden">
+      {/* --- ID ADDED HERE SO THE BUTTON SCROLLS TO THIS EXACT SPOT --- */}
+      <section id="join-form" className="w-full bg-[#FAFAFA] relative z-20 py-20 lg:py-32 font-sans border-t border-gray-100 overflow-hidden">
         
         {/* Decorative Background Elements */}
         <div className="absolute top-0 right-0 w-full h-full overflow-hidden pointer-events-none">

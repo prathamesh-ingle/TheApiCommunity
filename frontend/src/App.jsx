@@ -10,6 +10,8 @@ import BackToTop from "./components/BackToTop";
 // Pages
 import HomePage from "./pages/HomePage";
 import AboutPage from "./pages/AboutPage"; 
+import TeamPage from "./pages/TeamPage";
+import SpeakersPage from "./pages/SpeakersPage";
 
 // --- HELPER COMPONENT: Scrolls to top on route change ---
 const ScrollToTop = () => {
@@ -50,6 +52,8 @@ function App() {
         <Route element={<PublicLayout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/speakers" element={<SpeakersPage />} />
+          <Route path="/team" element={<TeamPage />} />
         </Route>
       </Routes>
     </>
