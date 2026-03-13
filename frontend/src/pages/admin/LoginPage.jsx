@@ -13,30 +13,77 @@ const LoginPage = () => {
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleLoginSubmit = (e) => {
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate API call to send OTP
-    setTimeout(() => {
-      toast.success("Security code sent to your email!");
-      setStep(2);
+    
+    try {
+      // TODO 1: Replace the URL below with your actual backend Login API endpoint
+      const response = await fetch("http://localhost:5001/api/admin/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        // TODO 2: Ensure these keys (email, password) match what your backend expects
+        body: JSON.stringify({ 
+          email: form.email, 
+          password: form.password 
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success(data.message || "Security code sent to your email!");
+        setStep(2);
+      } else {
+        toast.error(data.message || "Invalid credentials. Please try again.");
+      }
+    } catch (error) {
+      console.error("Login Error:", error);
+      toast.error("Unable to connect to the server.");
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
-  const handleOtpSubmit = (e) => {
+  const handleOtpSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate OTP verification
-    setTimeout(() => {
-      if (otp === "123456") {
+    
+    try {
+      // TODO 3: Replace the URL below with your actual backend OTP Verification API endpoint
+      const response = await fetch("http://localhost:5001/api/admin/verify", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        // TODO 4: Ensure these keys match your backend. 
+        // Note: You usually need to send the email along with the OTP so the backend knows who to verify!
+        body: JSON.stringify({ 
+          email: form.email,
+          code: otp 
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
         toast.success("Access Granted! Redirecting...");
-        // navigate("/admin/dashboard");
+        
+        // TODO 5: If your backend returns a token (like JWT), save it here before navigating
+        // localStorage.setItem("token", data.token);
+
+        navigate("/admin/dashboard");
       } else {
-        toast.error("Invalid code. Try 123456 for testing.");
+        toast.error(data.message || "Invalid code. Please check and try again.");
       }
+    } catch (error) {
+      console.error("OTP Error:", error);
+      toast.error("Unable to connect to the server.");
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (
