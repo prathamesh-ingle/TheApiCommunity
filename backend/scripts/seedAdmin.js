@@ -1,9 +1,10 @@
-import mongoose from "mongoose";
 import dotenv from "dotenv";
+dotenv.config();
+import mongoose from "mongoose";
 /* import bcrypt from "bcryptjs"; */
 import Admin from '../src/models/AdminModel.js'
 
-dotenv.config();
+
 
 const seedAdmin = async () => {
   try {
