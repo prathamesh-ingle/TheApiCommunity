@@ -13,6 +13,11 @@ import AboutPage from "./pages/AboutPage";
 import TeamPage from "./pages/TeamPage";
 import SpeakersPage from "./pages/SpeakersPage";
 
+//admin
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminLayout from './layouts/AdminLayout';
+import ManageEvents from './pages/admin/ManageEvents';
+
 // --- HELPER COMPONENT: Scrolls to top on route change ---
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -55,7 +60,15 @@ function App() {
           <Route path="/speakers" element={<SpeakersPage />} />
           <Route path="/team" element={<TeamPage />} />
         </Route>
+
+        <Route path="/admin" element={<AdminLayout />}>
+    <Route path="dashboard" element={<AdminDashboard />} />
+    <Route path="events" element={<ManageEvents />} />
+    {/* Add other admin routes here later like /admin/events */}
+</Route>
       </Routes>
+
+      
     </>
   );
 }
