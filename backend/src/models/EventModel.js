@@ -1,3 +1,4 @@
+// backend/src/models/EventModel.js
 import mongoose from "mongoose";
 
 const speakerSchema = new mongoose.Schema({

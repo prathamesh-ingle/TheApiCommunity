@@ -1,3 +1,4 @@
+// frontend/src/layouts/AdminLayout.jsx
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Navbar, Sidebar } from "../components/admin/exports";

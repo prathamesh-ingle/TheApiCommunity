@@ -1,3 +1,4 @@
+// backend/src/utils/email.utils.js
 import dotenv from "dotenv";
 dotenv.config();
 

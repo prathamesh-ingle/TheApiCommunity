@@ -1,3 +1,4 @@
+// frontend/src/components/admin/Sidebar.jsx
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {

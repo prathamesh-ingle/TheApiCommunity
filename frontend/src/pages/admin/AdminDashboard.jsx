@@ -1,3 +1,4 @@
+// frontend/src/pages/admin/AdminDashboard.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
