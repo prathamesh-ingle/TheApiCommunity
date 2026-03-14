@@ -18,6 +18,8 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const otpRefs = useRef([]);
 
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5001/api";
+
   // Timer Effect
   useEffect(() => {
     let interval;
@@ -36,7 +38,7 @@ const LoginPage = () => {
     setIsLoading(true);
     
     try {
-      const response = await fetch("http://localhost:5001/api/admin/login", {
+      const response = await fetch(`${API_BASE_URL}/admin/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -66,7 +68,7 @@ const LoginPage = () => {
     setIsResending(true);
 
     try {
-      const response = await fetch("http://localhost:5001/api/admin/login", {
+      const response = await fetch(`${API_BASE_URL}/admin/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -97,7 +99,7 @@ const LoginPage = () => {
     
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:5001/api/admin/verify", {
+      const response = await fetch(`${API_BASE_URL}/admin/verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

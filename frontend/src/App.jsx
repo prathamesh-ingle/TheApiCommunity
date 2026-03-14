@@ -22,6 +22,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminLayout from './layouts/AdminLayout';
 import ManageEvents from './pages/admin/ManageEvents';
 import AddEvent from './pages/admin/AddEvent';
+import ManageApplicants from './pages/admin/ManageApplicants';
 
 // --- HELPER COMPONENT: Scrolls to top on route change ---
 const ScrollToTop = () => {
@@ -75,6 +76,7 @@ function App() {
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="events" element={<ManageEvents />} />
             <Route path="add-event" element={<AddEvent />} />
+            <Route path="applicants" element={<ManageApplicants />} />
           </Route>
         </Route>
       </Routes>

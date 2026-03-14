@@ -3,14 +3,16 @@ import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Calendar, CalendarPlus, Users,
-  ShieldCheck, X, Settings, Terminal
+  ShieldCheck, X, LogOut, Terminal
 } from "lucide-react";
+import toast from "react-hot-toast";
+import { logoutAdmin } from "../../api/adminApi"; // Assuming your adminApi has the logout function
 
-// Updated Navigation Options
 const MENU_ITEMS = [
   { key: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { key: "/admin/events", icon: Calendar, label: "Manage Events" },
   { key: "/admin/add-event", icon: CalendarPlus, label: "Add Event" },
+  { key: "/admin/applicants", icon: Users, label: "Applicants" }, // Updated icon to Users
 ];
 
 const Sidebar = ({ isMobileOpen, onCloseMobile, onHoverChange }) => {
@@ -21,6 +23,19 @@ const Sidebar = ({ isMobileOpen, onCloseMobile, onHoverChange }) => {
   const handleNavClick = (path) => {
     navigate(path);
     onCloseMobile?.();
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logoutAdmin();
+      toast.success("Successfully logged out.", {
+        style: { borderRadius: '12px', fontSize: '13px', fontWeight: '600' }
+      });
+      navigate("/admin/login");
+      onCloseMobile?.();
+    } catch (error) {
+      toast.error("Failed to log out. Please try again.");
+    }
   };
 
   return (
@@ -35,8 +50,13 @@ const Sidebar = ({ isMobileOpen, onCloseMobile, onHoverChange }) => {
         <div className="px-4 py-3 border-b border-slate-100 flex items-center h-[72px]">
           <div className="relative flex items-center gap-3 w-full rounded-2xl bg-white border border-slate-200/60 p-1 shadow-[0_2px_12px_-4px_rgba(10,114,148,0.15)] hover:border-[#BAE6FD] transition-all duration-300 overflow-hidden">
             
-            <div className="relative flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-xl shadow-sm">
-                          <img src="/logo.png" alt="API Logo" className="w-full h-full object-contain drop-shadow-sm group-hover:scale-110 transition-transform duration-500 relative z-10" />
+            {/* Responsive Logo Container */}
+            <div className="relative flex-shrink-0 flex items-center justify-center w-8 h-8 lg:w-10 lg:h-10 rounded-xl shadow-sm">
+              <img 
+                src="/logo.png" 
+                alt="API Logo" 
+                className="w-full h-full max-w-full max-h-full object-contain drop-shadow-sm group-hover:scale-110 transition-transform duration-500 relative z-10" 
+              />
             </div>
 
             <div className="min-w-0 flex-1 opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300 delay-75">
@@ -100,23 +120,17 @@ const Sidebar = ({ isMobileOpen, onCloseMobile, onHoverChange }) => {
           })}
         </nav>
 
-        {/* --- BOTTOM ACTION: SETTINGS --- */}
+        {/* --- BOTTOM ACTION: LOGOUT --- */}
         <div className="px-3 pb-3 pt-2 border-t border-slate-100 bg-white">
           <button 
-            onClick={() => handleNavClick('/admin/settings')}
-            className={`w-full flex items-center gap-3 rounded-xl px-3 py-2 text-[11px] font-bold transition-all duration-200 border overflow-hidden ${
-              activeKey === "/admin/settings"
-                ? "bg-slate-900 text-white border-slate-800 shadow-md"
-                : "bg-white text-slate-600 border-transparent hover:bg-slate-50 hover:text-[#0A7294] hover:border-slate-200"
-            }`}
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 rounded-xl px-3 py-2 text-[11px] font-bold transition-all duration-200 border overflow-hidden bg-white text-rose-500 border-transparent hover:bg-rose-50 hover:border-rose-100 group"
           >
-            <span className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl transition-colors ${
-              activeKey === "/admin/settings" ? "bg-slate-800" : "bg-slate-100 group-hover:bg-[#F0F9FF]"
-            }`}>
-              <Settings size={16} />
+            <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl transition-colors bg-rose-50 group-hover:bg-rose-100 text-rose-500">
+              <LogOut size={16} />
             </span>
             <div className="flex flex-col items-start flex-1 opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300 delay-75 whitespace-nowrap">
-              <span>Settings</span>
+              <span>Log Out</span>
             </div>
           </button>
         </div>
@@ -129,8 +143,12 @@ const Sidebar = ({ isMobileOpen, onCloseMobile, onHoverChange }) => {
           
           <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-slate-100">
             <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-[#0A7294] to-[#22B3AD] flex items-center justify-center text-white shadow-sm">
-                <Terminal size={18} />
+              <div className="h-9 w-9 rounded-xl flex items-center justify-center text-white shadow-sm">
+                <img 
+                src="/logo.png" 
+                alt="API Logo" 
+                className="w-full h-full max-w-full max-h-full object-contain drop-shadow-sm group-hover:scale-110 transition-transform duration-500 relative z-10" 
+              />
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-bold text-slate-900 truncate">API Admin</p>
@@ -172,17 +190,13 @@ const Sidebar = ({ isMobileOpen, onCloseMobile, onHoverChange }) => {
             })}
           </div>
           
-          {/* --- MOBILE BOTTOM ACTION: SETTINGS --- */}
+          {/* --- MOBILE BOTTOM ACTION: LOGOUT --- */}
           <div className="p-4 border-t border-slate-100">
              <button 
-               onClick={() => handleNavClick('/admin/settings')} 
-               className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-xs transition-colors ${
-                 activeKey === '/admin/settings' 
-                 ? "bg-slate-900 text-white shadow-md" 
-                 : "bg-slate-50 text-slate-700 hover:bg-[#F0F9FF] hover:text-[#0A7294]"
-               }`}
+               onClick={handleLogout} 
+               className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-xs transition-colors bg-rose-50 text-rose-600 hover:bg-rose-100 hover:text-rose-700 shadow-sm"
              >
-               <Settings size={16} /> Settings
+               <LogOut size={16} /> Log Out
              </button>
           </div>
         </div>
