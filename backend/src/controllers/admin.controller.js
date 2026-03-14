@@ -14,13 +14,13 @@ const generateAdminToken = (id, email) => {
 };
 
 // Set JWT in HTTP-only cookie
+// Set JWT in HTTP-only cookie
 const sendAdminCookie = (res, token) => {
- res.cookie("token", token, {
+  res.cookie("token", token, {
     httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // 👈 THE FIX
+    secure: process.env.NODE_ENV === "production", // MUST be true if sameSite is "none"
     path: "/",
-    // 🚨 Remove the maxAge line completely!
   });
 };
 
@@ -303,6 +303,12 @@ export const checkAuth = (req, res) => {
 };
 
 export const logoutAdmin = (req, res) => {
-  res.clearCookie("token", { path: "/" });
+  res.clearCookie("token", {
+    httpOnly: true,
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // 👈 MUST MATCH CREATION
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+  });
+  
   res.status(200).json({ success: true, message: "Logged out successfully" });
 };
