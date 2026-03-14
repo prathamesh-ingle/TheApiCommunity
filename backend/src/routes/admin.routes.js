@@ -7,7 +7,8 @@ import{
     updateEvent,
     deleteEvent,
     getAdminDashboard,
-    getAllApplicants
+    getAllApplicants,
+    AdminLogout
 } from "../controllers/admin.controller.js";
 import { upload } from "../middleware/upload.middleware.js";
 import multer from 'multer'; // No dots or slashes here, just the package name
@@ -45,4 +46,6 @@ router.get("/dashboard", verifyAdmin, getAdminDashboard);
 
 //http://localhost:5001/api/admin/applicants
 router.get("/applicants", verifyAdmin,getAllApplicants);
+
+router.post("/logout",AdminLogout);
 export default router;

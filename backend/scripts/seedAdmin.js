@@ -14,7 +14,7 @@ const seedAdmin = async () => {
     await mongoose.connect(uri);
     console.log("✅ MongoDB Connected!");
 
-    const adminEmail = "sanketbochare90@gmail.com"; // Change this to your actual email
+    const adminEmail = "sanketbochare90@gmail.com"; 
 
     // Check if we already seeded the admin
     const existingAdmin = await Admin.findOne({ email: adminEmail });
@@ -28,7 +28,7 @@ const seedAdmin = async () => {
     const hashedPassword ="sanketBochare@2005" //await bcrypt.hash("sanketBochare@2005", salt); // Change this password!
 
     await Admin.create({
-      name: "Sanket Bochare", // Or "PayNidhi Super Admin"
+      name: "Sanket Bochare",
       email: adminEmail,
       password: hashedPassword,
     });

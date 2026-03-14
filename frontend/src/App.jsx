@@ -21,6 +21,9 @@ import AdminLayout from './layouts/AdminLayout';
 import ManageEvents from './pages/admin/ManageEvents';
 import AddEvent from './pages/admin/AddEvent';
 
+// Import your protected route component
+import AdminProtectedRoute from './components/auth/AdminProtectedRoute';
+
 // --- HELPER COMPONENT: Scrolls to top on route change ---
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -65,17 +68,20 @@ function App() {
           <Route path="/speakers" element={<SpeakersPage />} />
           <Route path="/team" element={<TeamPage />} />
         </Route>
+        
         <Route path="/admin/login" element={<LoginPage/>}></Route>
 
-        <Route path="/admin" element={<AdminLayout />}>
-    <Route path="dashboard" element={<AdminDashboard />} />
-    <Route path="events" element={<ManageEvents />} />
-    <Route path="add-event" element={<AddEvent />} />
-    {/* Add other admin routes here later like /admin/events */}
-</Route>
+        {/* --- PROTECTED ADMIN ROUTES --- */}
+        <Route element={<AdminProtectedRoute />}>
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="events" element={<ManageEvents />} />
+            <Route path="add-event" element={<AddEvent />} />
+            {/* Add other admin routes here later like /admin/events */}
+          </Route>
+        </Route>
+        
       </Routes>
-
-      
     </>
   );
 }

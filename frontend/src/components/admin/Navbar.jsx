@@ -17,11 +17,26 @@ const Navbar = ({ onToggleSidebar }) => {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [open]);
 
-  const handleLogout = () => {
-    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+ const handleLogout = async () => {
+  try {
+    // 1. Send a request to the backend so IT can delete the HttpOnly cookie
+    await fetch("http://localhost:5001/api/admin/logout", {
+      method: "POST",
+      credentials: "include", // 🚨 MAGIC KEY: Tells the browser to send the cookie so the backend can destroy it
+    });
+
+    // 2. Clear your frontend session data
+    sessionStorage.removeItem("adminUser");
+    
+    // 3. Notify the user and redirect
     toast.success("Logged out successfully");
     window.location.href = "/";
-  };
+
+  } catch (error) {
+    console.error("Logout failed:", error);
+    toast.error("Something went wrong during logout.");
+  }
+};
 
   return (
     <header className="h-16 lg:h-20 bg-white/90 lg:bg-transparent backdrop-blur lg:backdrop-blur-none border-b border-slate-200/80 lg:border-none flex items-center sticky top-0 z-40 transition-all">

@@ -3,28 +3,30 @@ import { useNavigate } from "react-router-dom";
 import { Mail, Lock, Eye, EyeOff, ArrowRight, KeyRound, ArrowLeft } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 
+import { useAuth } from "../../context/AuthContext"; 
+
 const LoginPage = () => {
-  const [step, setStep] = useState(1); // 1 = Login, 2 = OTP
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
+  const [step, setStep] = useState(1); 
   const [form, setForm] = useState({ email: "", password: "" });
   const [otp, setOtp] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
+  // --- STEP 1: SEND CREDENTIALS TO BACKEND ---
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     
     try {
-      // TODO 1: Replace the URL below with your actual backend Login API endpoint
       const response = await fetch("http://localhost:5001/api/admin/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        // TODO 2: Ensure these keys (email, password) match what your backend expects
+        headers: { "Content-Type": "application/json" },
+        credentials: "include", // <-- Added here too, just to be safe
         body: JSON.stringify({ 
           email: form.email, 
           password: form.password 
@@ -35,7 +37,7 @@ const LoginPage = () => {
 
       if (response.ok) {
         toast.success(data.message || "Security code sent to your email!");
-        setStep(2);
+        setStep(2); 
       } else {
         toast.error(data.message || "Invalid credentials. Please try again.");
       }
@@ -47,19 +49,16 @@ const LoginPage = () => {
     }
   };
 
+  // --- STEP 2: VERIFY OTP & UPDATE GLOBAL CONTEXT ---
   const handleOtpSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     
     try {
-      // TODO 3: Replace the URL below with your actual backend OTP Verification API endpoint
       const response = await fetch("http://localhost:5001/api/admin/verify", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        // TODO 4: Ensure these keys match your backend. 
-        // Note: You usually need to send the email along with the OTP so the backend knows who to verify!
+        headers: { "Content-Type": "application/json" },
+        credentials: "include", // <-- Magic key for cookies
         body: JSON.stringify({ 
           email: form.email,
           code: otp 
@@ -71,9 +70,9 @@ const LoginPage = () => {
       if (response.ok) {
         toast.success("Access Granted! Redirecting...");
         
-        // TODO 5: If your backend returns a token (like JWT), save it here before navigating
-        // localStorage.setItem("token", data.token);
-
+        // No localStorage here at all! Just update Context and Navigate.
+        const adminData = { email: form.email, role: "admin" };
+        login(adminData); 
         navigate("/admin/dashboard");
       } else {
         toast.error(data.message || "Invalid code. Please check and try again.");
