@@ -1,10 +1,11 @@
+// frontend/src/pages/admin/AddEvent.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft, Calendar, Clock, MapPin, 
   ImageIcon, Users, Plus, Trash2, UploadCloud, 
-  Camera, LayoutTemplate, AlignLeft
+  Camera, LayoutTemplate, AlignLeft, Sparkles, CheckCircle2
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { createEvent } from "../../api/adminApi"; 
@@ -12,6 +13,7 @@ import EventForm from "../../components/admin/EventForm";
 const AddEvent = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
   const handleAddSubmit = async ({ formData, eventImages, speakers }) => {
     setIsSubmitting(true);

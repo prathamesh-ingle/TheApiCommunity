@@ -9,20 +9,20 @@ import BackToTop from "./components/BackToTop";
 
 // Pages
 import HomePage from "./pages/HomePage";
-import AboutPage from "./pages/AboutPage"; 
+import AboutPage from "./pages/AboutPage";
 import TeamPage from "./pages/TeamPage";
 import SpeakersPage from "./pages/SpeakersPage";
+import EventsPage from "./pages/EventsPage";
 
-//Admin pages
+// Admin pages
 import LoginPage from './pages/admin/LoginPage';
-//admin
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminLayout from './layouts/AdminLayout';
 import ManageEvents from './pages/admin/ManageEvents';
 import AddEvent from './pages/admin/AddEvent';
 
-// Import your protected route component
-import AdminProtectedRoute from './components/auth/AdminProtectedRoute';
+// Protected Route Component (Make sure this path is correct for your project)
+import ProtectedRoute from './components/admin/ProtectedRoute';
 
 // --- HELPER COMPONENT: Scrolls to top on route change ---
 const ScrollToTop = () => {
@@ -44,7 +44,7 @@ const PublicLayout = () => {
     <div className="flex flex-col min-h-screen">
       <Navbar />
       <div className="flex-grow">
-        <Outlet /> 
+        <Outlet />
       </div>
       <Footer />
       <BackToTop />
@@ -53,8 +53,6 @@ const PublicLayout = () => {
 };
 
 function App() {
-  const location=useLocation();
-  location.pathname.startsWith("/admin");
   return (
     <>
       {/* ScrollToTop helper ensures every new page starts at the top */}
@@ -62,22 +60,25 @@ function App() {
 
       {/* Main Routing */}
       <Routes>
+        
+        {/* --- PUBLIC ROUTES --- */}
         <Route element={<PublicLayout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/speakers" element={<SpeakersPage />} />
           <Route path="/team" element={<TeamPage />} />
+          <Route path="/events" element={<EventsPage />} />
         </Route>
-        
-        <Route path="/admin/login" element={<LoginPage/>}></Route>
+
+        {/* --- ADMIN LOGIN --- */}
+        <Route path="/admin/login" element={<LoginPage />} />
 
         {/* --- PROTECTED ADMIN ROUTES --- */}
-        <Route element={<AdminProtectedRoute />}>
+        <Route element={<ProtectedRoute />}>
           <Route path="/admin" element={<AdminLayout />}>
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="events" element={<ManageEvents />} />
             <Route path="add-event" element={<AddEvent />} />
-            {/* Add other admin routes here later like /admin/events */}
           </Route>
         </Route>
         

@@ -1,3 +1,4 @@
+//backend/src/models/ApplicantModel.js
 import mongoose from "mongoose";
 
 const AppliacantSchema=new mongoose.Schema({

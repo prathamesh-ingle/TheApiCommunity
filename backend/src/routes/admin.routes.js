@@ -1,6 +1,5 @@
 import express from "express";
-
-import{
+import {
     AdminLogin,
     verifyAdminLogin,
     createEvent,
@@ -11,38 +10,25 @@ import{
     AdminLogout
 } from "../controllers/admin.controller.js";
 import { upload } from "../middleware/upload.middleware.js";
-import multer from 'multer'; // No dots or slashes here, just the package name
 import { verifyAdmin } from "../middleware/auth.js";
 
 const router = express.Router();
 
-//http://localhost:5001/api/admin/login
-router.post("/login",AdminLogin);
-
-//http://localhost:5001/api/admin/verify
-router.post("/verify",verifyAdminLogin);
-
-//http://localhost:5001/api/admin/add-event
-router.post("/add-event", 
-    verifyAdmin, 
-    upload.fields([
-        { name: 'eventImages' }, 
-        { name: 'speakerImages' }
-    ]), 
-    createEvent
-);
-
-//http://localhost:5001/api/admin/update-event
-router.put("/update-event/:id", 
-    upload.fields([{ name: 'eventImages' }, { name: 'speakerImages' }]), 
-    updateEvent
-);
-
-//http://localhost:5001/api/admin/delete-event
-router.delete("/delete-event/:id",verifyAdmin,deleteEvent)
-
-//http://localhost:5001/api/admin/dashboard
+// Existing Routes
+router.post("/login", AdminLogin);
+router.post("/verify", verifyAdminLogin);
+router.post("/add-event", verifyAdmin, upload.fields([{ name: 'eventImages' }, { name: 'speakerImages' }]), createEvent);
+router.put("/update-event/:id", verifyAdmin, upload.fields([{ name: 'eventImages' }, { name: 'speakerImages' }]), updateEvent); // Note: Added verifyAdmin here for security
+router.delete("/delete-event/:id", verifyAdmin, deleteEvent);
 router.get("/dashboard", verifyAdmin, getAdminDashboard);
+router.get("/applicants", verifyAdmin, getAllApplicants);
+
+// --- NEW ROUTES ---
+// http://localhost:5001/api/admin/check-auth
+router.get("/check-auth", verifyAdmin, checkAuth);
+
+// http://localhost:5001/api/admin/logout
+router.post("/logout", logoutAdmin);
 
 //http://localhost:5001/api/admin/applicants
 router.get("/applicants", verifyAdmin,getAllApplicants);

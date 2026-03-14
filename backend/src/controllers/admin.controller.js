@@ -1,3 +1,4 @@
+//backend/src/controllers/admin.controller.js
 import express from "express";
 import jwt from "jsonwebtoken";
 import { v2 as cloudinary } from "cloudinary";
@@ -294,4 +295,14 @@ export const getAllApplicants = async (req, res) => {
             error: error.message
         });
     }
+};
+
+export const checkAuth = (req, res) => {
+  // If the request passes the verifyAdmin middleware, they are authenticated
+  res.status(200).json({ success: true, admin: req.admin });
+};
+
+export const logoutAdmin = (req, res) => {
+  res.clearCookie("token", { path: "/" });
+  res.status(200).json({ success: true, message: "Logged out successfully" });
 };

@@ -1,7 +1,9 @@
+//frontend/src/components/admin/Navbar.jsx
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogOut, Settings, Bell, Menu, Search, User2 } from "lucide-react";
 import toast from "react-hot-toast";
+import { logoutAdmin } from "../../api/adminApi";
 
 const Navbar = ({ onToggleSidebar }) => {
   const navigate = useNavigate();

@@ -1,3 +1,4 @@
+//backend/src/middleware/auth.js
 import jwt from "jsonwebtoken";
 
 export const verifyAdmin=(req,res,next)=>{
