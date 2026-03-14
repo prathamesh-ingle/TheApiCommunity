@@ -5,6 +5,7 @@ import SplitType from 'split-type';
 import { useGSAP } from '@gsap/react';
 import { Database, Smartphone, Cloud, Server, Shield, Globe, Code2, Terminal, ArrowRight, Activity, Zap, Cpu, User, Mail, Phone, Sparkles } from 'lucide-react';
 import ThreeBackground from '../components/ThreeBackground'; 
+import toast, { Toaster } from 'react-hot-toast'; // --- NEW: Added for form notifications
 
 // --- AOS IMPORTS ---
 import AOS from 'aos';
@@ -28,6 +29,7 @@ const containerVars = { hidden: { opacity: 0 }, show: { opacity: 1, transition: 
 const itemVars = { hidden: { opacity: 0, y: 25, filter: "blur(4px)" }, show: { opacity: 1, y: 0, filter: "blur(0px)", transition: { type: 'spring', stiffness: 50, damping: 14 } } };
 const floatAnim = (delay = 0) => ({ y: [0, -12, 0], transition: { duration: 5 + Math.random() * 2, repeat: Infinity, ease: 'easeInOut', delay } });
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5001/api";
 // Drop waves animation
 const dropWaveAnim = (delay = 0) => ({ 
   scale: [0.8, 2.5, 4], 
@@ -36,99 +38,51 @@ const dropWaveAnim = (delay = 0) => ({
   transition: { duration: 4.5, delay, repeat: Infinity, ease: "easeOut" } 
 });
 
-// --- PREMIUM STAT CARD WITH GLOWING HOVER BORDER ---
-const StatCard = ({ title, value, subtext, subtextColor, delay, hoverGradient, glowColor }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 30 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true, margin: "-50px" }}
-    transition={{ duration: 0.6, delay, ease: "easeOut" }}
-    className="group relative p-[2px] rounded-[2rem] bg-slate-100 hover:-translate-y-2 transition-all duration-500 hover:shadow-[0_20px_40px_-10px_rgba(10,114,148,0.15)] cursor-default"
-  >
-    {/* Flowing Animated Gradient Border */}
-    <div className={`absolute inset-0 bg-gradient-to-r ${hoverGradient} bg-[length:200%_auto] animate-gradient opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[2rem]`} />
-    
-    {/* Inner White Card */}
-    <div className="flex flex-col justify-center relative bg-white p-6 sm:p-7 rounded-[calc(2rem-2px)] h-full z-10 overflow-hidden transition-all duration-500">
-      
-      {/* Internal Hover Spotlight */}
-      <div className={`absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-bl ${glowColor} to-transparent rounded-full blur-3xl opacity-0 group-hover:opacity-20 transition-all duration-700 group-hover:translate-x-2 group-hover:translate-y-2`} />
-
-      <h4 className="relative z-10 text-[11px] font-extrabold text-slate-400 uppercase tracking-[0.15em] mb-4 group-hover:text-slate-600 transition-colors duration-300">
-        {title}
-      </h4>
-      <div className="relative z-10 text-4xl sm:text-5xl font-black text-slate-900 tracking-tighter mb-4 flex items-baseline group-hover:scale-[1.03] origin-left transition-transform duration-500">
-        <AnimatedCounter from={0} to={value} />
-        <span className="text-[#0A7294] ml-1">+</span>
-      </div>
-      <div className={`relative z-10 text-[13px] font-semibold flex items-center gap-1.5 px-3 py-2 bg-slate-50/80 rounded-xl border border-slate-100 w-fit ${subtextColor} group-hover:bg-white group-hover:border-slate-200 transition-all duration-300`}>
-        {subtext}
-      </div>
-    </div>
-  </motion.div>
-);
-
-// --- FEATURE LIST ITEM WITH HOVER PHYSICS ---
-const FeatureItem = ({ icon: Icon, title, desc, delay }) => (
-  <motion.div
-    initial={{ opacity: 0, x: -20 }}
-    whileInView={{ opacity: 1, x: 0 }}
-    viewport={{ once: true }}
-    transition={{ duration: 0.5, delay }}
-    whileHover={{ x: 8, backgroundColor: "#f8fafc" }}
-    className="flex items-start gap-4 p-4 rounded-2xl transition-all duration-300 border border-transparent hover:border-slate-100 hover:shadow-sm cursor-default"
-  >
-    <div className="mt-1 bg-gradient-to-br from-[#e0f2fe] to-[#bae6fd] p-2.5 rounded-full text-[#0A7294] shadow-inner transition-transform duration-300 hover:scale-110">
-      <Icon size={18} strokeWidth={2.5} />
-    </div>
-    <div>
-      <h4 className="text-lg font-bold text-slate-900">{title}</h4>
-      <p className="text-[15px] text-slate-500 font-medium leading-relaxed mt-1">
-        {desc}
-      </p>
-    </div>
-  </motion.div>
-);
-
-// --- ANTI-LAG GPU ACCELERATED EVENT CARD ---
-const EventCard = ({ imgUrl, title, tag }) => (
-  <div 
-    style={{ contain: 'paint layout', transform: 'translateZ(0)', WebkitBackfaceVisibility: 'hidden' }}
-    className="group relative w-[280px] sm:w-[340px] shrink-0 flex flex-col rounded-2xl bg-white border border-gray-200 shadow-sm overflow-hidden transition-all duration-300 hover:shadow-[0_20px_40px_-10px_rgba(10,114,148,0.15)] hover:-translate-y-2 cursor-pointer mx-3"
-  >
-    {/* Image Section */}
-    <div className="relative w-full h-[180px] overflow-hidden bg-slate-100">
-      <img 
-        src={imgUrl} 
-        alt={title} 
-        loading="lazy" 
-        decoding="async" 
-        style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
-        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-      />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-transparent opacity-70 pointer-events-none" />
-      
-      <div className="absolute top-4 left-4 z-10">
-        <span className="px-3 py-1.5 rounded-[0.4rem] bg-black/70 text-white text-[11px] font-semibold tracking-wide border border-white/20 transition-colors duration-300 group-hover:bg-[#0A7294]/90">
-          {tag}
-        </span>
-      </div>
-    </div>
-    
-    {/* Text Section */}
-    <div className="p-5 flex-grow bg-white flex items-center">
-      <h3 className="text-slate-800 font-semibold text-[16px] sm:text-[17px] leading-snug line-clamp-2 group-hover:text-[#0A7294] transition-colors">
-        {title}
-      </h3>
-    </div>
-  </div>
-);
-
 const HomePage = () => {
   const bgRef = useRef(null);
   const headingRef = useRef(null);
   const splitRef = useRef(null);
   const [eventsData, setEventsData] = useState({ topRow: [], bottomRow: [] });
+
+  // --- NEW: FORM STATE & HANDLERS ---
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    phone: "",
+    email: "",
+    intrest: ""
+  });
+
+  const handleInputChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    const tId = toast.loading("Submitting application...");
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/user/application-form`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok || response.status === 201) {
+        toast.success("Application submitted successfully!", { id: tId });
+        setFormData({ name: "", phone: "", email: "", intrest: "" }); // Reset
+      } else {
+        toast.error(data.message || "Failed to submit. Email might exist.", { id: tId });
+      }
+    } catch (error) {
+      toast.error("Server error. Please try again.", { id: tId });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // --- INITIALIZE AOS & FETCH EVENTS ---
   useEffect(() => {
@@ -235,35 +189,26 @@ const HomePage = () => {
 
   return (
     <div className="relative w-full bg-[#FCFCFD] font-sans overflow-x-hidden" ref={bgRef}>
+      {/* --- NEW: Toaster Component for UI Feedback --- */}
+      <Toaster position="top-center" />
       
       {/* ========================================== */}
       {/* 1. HERO SECTION                            */}
       {/* ========================================== */}
       <div className="relative flex min-h-[calc(100vh-80px)] items-center pt-24 pb-16 overflow-hidden">
-        
-        {/* --- CINEMATIC NOISE GRAIN --- */}
         <div className="absolute inset-0 z-10 pointer-events-none opacity-[0.025] mix-blend-overlay" style={{ backgroundImage: "url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E')" }}></div>
-
-        {/* --- THREE.JS 3D PARTICLE UNIVERSE --- */}
         <ThreeBackground />
 
-        {/* --- UPGRADED 2D BACKGROUND --- */}
         <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-          <div 
-            className="gsap-grid absolute inset-0 bg-[linear-gradient(to_right,#0A729415_1px,transparent_1px),linear-gradient(to_bottom,#0A729415_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_80%_60%_at_50%_0%,#000_100%,transparent_100%)]" 
-            style={{ backgroundPosition: '0px 0px' }}
-          />
+          <div className="gsap-grid absolute inset-0 bg-[linear-gradient(to_right,#0A729415_1px,transparent_1px),linear-gradient(to_bottom,#0A729415_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_80%_60%_at_50%_0%,#000_100%,transparent_100%)]" style={{ backgroundPosition: '0px 0px' }} />
           <div className="gsap-orb-1 absolute top-[-5%] left-[-5%] h-[650px] w-[650px] rounded-full bg-gradient-to-br from-[#0A7294]/[0.08] to-transparent blur-[120px]" />
           <div className="gsap-orb-2 absolute bottom-[-5%] right-[-5%] h-[750px] w-[750px] rounded-full bg-gradient-to-tl from-[#22B3AD]/[0.09] to-transparent blur-[130px]" />
           <div className="absolute top-[30%] left-[40%] h-[500px] w-[500px] rounded-full bg-gradient-to-tr from-[#FF9A3D]/[0.05] to-transparent blur-[120px]" />
         </div>
 
-        {/* --- MAIN UI CONTENT --- */}
         <main className="relative z-20 mx-auto grid w-full max-w-7xl items-center gap-12 px-6 lg:grid-cols-2 lg:gap-16 lg:py-0 pb-12 sm:pb-0">
           
-          {/* LEFT COLUMN */}
           <motion.div variants={containerVars} initial="hidden" animate="show" className="space-y-8 text-center lg:text-left z-20">
-            
             <motion.div variants={itemVars} whileHover={{ scale: 1.05, y: -2 }} className="inline-flex cursor-pointer items-center gap-2 px-5 py-2 rounded-full bg-white/80 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,1)] border border-white mx-auto lg:mx-0 transition-shadow hover:shadow-[0_8px_25px_rgba(255,154,61,0.2),inset_0_1px_0_rgba(255,255,255,1)]">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF9A3D] opacity-60"></span>
@@ -272,16 +217,9 @@ const HomePage = () => {
               <span className="text-[10px] font-bold text-[#FF9A3D] tracking-widest uppercase">Global API Network</span>
             </motion.div>
 
-            {/* GSAP SPLIT TEXT TARGET */}
-            <h1 
-              ref={headingRef} 
-              className="text-[3.5rem] font-extrabold leading-[1.02] tracking-[-0.04em] text-[#0A0A0A] sm:text-6xl lg:text-[5.5rem] drop-shadow-sm cursor-pointer perspective-[500px]"
-            >
-              Join Our
-              <br />
-              <span className="italic font-serif font-normal text-[#0A7294] pr-4 pb-2 block">
-                Community.
-              </span>
+            <h1 ref={headingRef} className="text-[3.5rem] font-extrabold leading-[1.02] tracking-[-0.04em] text-[#0A0A0A] sm:text-6xl lg:text-[5.5rem] drop-shadow-sm cursor-pointer perspective-[500px]">
+              Join Our<br />
+              <span className="italic font-serif font-normal text-[#0A7294] pr-4 pb-2 block">Community.</span>
             </h1>
 
             <motion.p variants={itemVars} className="mx-auto max-w-md text-lg font-medium leading-relaxed text-[#52525B] lg:mx-0">
@@ -289,12 +227,7 @@ const HomePage = () => {
             </motion.p>
 
             <motion.div variants={itemVars} className="flex flex-col items-center gap-5 pt-4 sm:flex-row sm:justify-center lg:justify-start">
-              
-              {/* --- CLICK HANDLER ADDED HERE --- */}
-              <button 
-                onClick={scrollToForm}
-                className="blob-btn group flex w-full sm:w-auto items-center justify-center gap-2 px-9 py-4 text-[15px] font-bold text-slate-900"
-              >
+              <button onClick={scrollToForm} className="blob-btn group flex w-full sm:w-auto items-center justify-center gap-2 px-9 py-4 text-[15px] font-bold text-slate-900">
                 <Terminal className="h-4 w-4 relative z-10 transition-colors duration-300 group-hover:text-white" />
                 <span className="relative z-10">Join Community</span>
                 <span className="blob-btn__inner">
@@ -311,7 +244,6 @@ const HomePage = () => {
                 Explore Events
                 <ArrowRight className="w-4 h-4 text-[#22B3AD]" />
               </button>
-
             </motion.div>
 
             <motion.div variants={itemVars} className="flex flex-wrap items-center justify-center lg:justify-start gap-12 pt-8">
@@ -337,10 +269,7 @@ const HomePage = () => {
             </motion.div>
           </motion.div>
 
-          {/* RIGHT COLUMN: REFINED ORBITS & GLOWING NODES */}
           <div className="relative flex h-[360px] w-full items-center justify-center sm:h-[420px] lg:h-[550px] z-20">
-            
-            {/* Softer Drop Waves */}
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
               <motion.div className="absolute h-40 w-40 rounded-full border-[#0A7294]/40" animate={dropWaveAnim(0)} />
               <motion.div className="absolute h-40 w-40 rounded-full border-[#22B3AD]/30" animate={dropWaveAnim(1.1)} />
@@ -359,7 +288,6 @@ const HomePage = () => {
               </motion.div>
             </motion.div>
 
-            {/* Central Logo */}
             <motion.div initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 1, type: 'spring', bounce: 0.5 }} className="absolute z-30 flex h-36 w-36 cursor-pointer items-center justify-center rounded-full bg-white shadow-[0_20px_50px_rgba(10,114,148,0.15)] border-[3px] border-white relative transition-transform hover:scale-105 group">
               <motion.div animate={{ rotate: 360 }} transition={{ duration: 10, repeat: Infinity, ease: "linear" }} className="absolute inset-[-12px] rounded-full border-[1.5px] border-transparent border-t-[#0A7294]/50" />
               <motion.div animate={{ rotate: -360 }} transition={{ duration: 15, repeat: Infinity, ease: "linear" }} className="absolute inset-[-20px] rounded-full border-[1px] border-dashed border-[#22B3AD]/40" />
@@ -369,69 +297,35 @@ const HomePage = () => {
 
             <div className="absolute inset-0 z-40">
               <motion.div animate={{ ...floatAnim(0), rotate: [0, 4, -4, 0] }} className={`absolute cursor-pointer left-[20%] top-[15%] flex items-center justify-center p-2 rounded-[1.2rem] shadow-[0_8px_20px_rgba(10,114,148,0.15)] ${baseGlass}`}>
-                <div className="bg-gradient-to-br from-[#0A7294] to-[#065069] p-3 rounded-xl shadow-inner">
-                  <motion.div animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 2, repeat: Infinity }}><Smartphone className="h-5 w-5 text-white" /></motion.div>
-                </div>
+                <div className="bg-gradient-to-br from-[#0A7294] to-[#065069] p-3 rounded-xl shadow-inner"><motion.div animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 2, repeat: Infinity }}><Smartphone className="h-5 w-5 text-white" /></motion.div></div>
               </motion.div>
-              
               <motion.div animate={{ ...floatAnim(1), rotate: [0, -5, 3, 0] }} className={`absolute cursor-pointer right-[16%] top-[20%] flex items-center justify-center p-2 rounded-[1.2rem] shadow-[0_8px_20px_rgba(34,179,173,0.15)] ${baseGlass}`}>
-                <div className="bg-gradient-to-br from-[#22B3AD] to-[#168580] p-3 rounded-xl shadow-inner">
-                  <motion.div animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 2.2, repeat: Infinity, delay: 0.5 }}><Database className="h-5 w-5 text-white" /></motion.div>
-                </div>
+                <div className="bg-gradient-to-br from-[#22B3AD] to-[#168580] p-3 rounded-xl shadow-inner"><motion.div animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 2.2, repeat: Infinity, delay: 0.5 }}><Database className="h-5 w-5 text-white" /></motion.div></div>
               </motion.div>
-              
               <motion.div animate={{ ...floatAnim(0.5), rotate: [0, 4, -4, 0] }} className={`absolute cursor-pointer bottom-[25%] left-[12%] flex items-center justify-center p-2 rounded-[1.2rem] shadow-[0_8px_20px_rgba(168,85,247,0.15)] ${baseGlass}`}>
-                 <div className="bg-gradient-to-br from-[#a855f7] to-[#7e22ce] p-3 rounded-xl shadow-inner">
-                   <motion.div animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 2.5, repeat: Infinity, delay: 1 }}><Cloud className="h-5 w-5 text-white" /></motion.div>
-                 </div>
+                 <div className="bg-gradient-to-br from-[#a855f7] to-[#7e22ce] p-3 rounded-xl shadow-inner"><motion.div animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 2.5, repeat: Infinity, delay: 1 }}><Cloud className="h-5 w-5 text-white" /></motion.div></div>
               </motion.div>
-              
               <motion.div animate={{ ...floatAnim(1.5), rotate: [0, -4, 4, 0] }} className={`absolute cursor-pointer bottom-[18%] right-[20%] flex items-center justify-center p-2 rounded-[1.2rem] shadow-[0_8px_20px_rgba(255,154,61,0.15)] ${baseGlass}`}>
-                 <div className="bg-gradient-to-br from-[#FF9A3D] to-[#cc711e] p-3 rounded-xl shadow-inner">
-                   <motion.div animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 2, repeat: Infinity, delay: 1.5 }}><Server className="h-5 w-5 text-white" /></motion.div>
-                 </div>
+                 <div className="bg-gradient-to-br from-[#FF9A3D] to-[#cc711e] p-3 rounded-xl shadow-inner"><motion.div animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 2, repeat: Infinity, delay: 1.5 }}><Server className="h-5 w-5 text-white" /></motion.div></div>
               </motion.div>
-              
               <motion.div animate={{ ...floatAnim(0.8), rotate: [0, 6, -6, 0] }} className={`absolute cursor-pointer right-[10%] top-[45%] flex items-center justify-center p-1.5 rounded-full shadow-[0_8px_20px_rgba(16,185,129,0.15)] ${baseGlass}`}>
-                 <div className="bg-gradient-to-br from-[#10b981] to-[#047857] p-2.5 rounded-full shadow-inner">
-                   <motion.div animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 2.3, repeat: Infinity, delay: 0.8 }}><Shield className="h-4 w-4 text-white" /></motion.div>
-                 </div>
+                 <div className="bg-gradient-to-br from-[#10b981] to-[#047857] p-2.5 rounded-full shadow-inner"><motion.div animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 2.3, repeat: Infinity, delay: 0.8 }}><Shield className="h-4 w-4 text-white" /></motion.div></div>
               </motion.div>
-              
               <motion.div animate={{ ...floatAnim(1.2), rotate: [0, -5, 5, 0] }} className={`absolute cursor-pointer bottom-[45%] left-[8%] flex items-center justify-center p-1.5 rounded-full shadow-[0_8px_20px_rgba(71,85,105,0.15)] ${baseGlass}`}>
-                 <div className="bg-gradient-to-br from-[#64748b] to-[#334155] p-2.5 rounded-full shadow-inner">
-                   <motion.div animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 2.6, repeat: Infinity, delay: 1.2 }}><Globe className="h-4 w-4 text-white" /></motion.div>
-                 </div>
+                 <div className="bg-gradient-to-br from-[#64748b] to-[#334155] p-2.5 rounded-full shadow-inner"><motion.div animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 2.6, repeat: Infinity, delay: 1.2 }}><Globe className="h-4 w-4 text-white" /></motion.div></div>
               </motion.div>
             </div>
           </div>
         </main>
 
-        {/* --- DECORATIVE BOTTOM WAVES --- */}
         <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-none pointer-events-none z-10 translate-y-[1px]">
-          <svg 
-            className="relative block w-full h-[8vh] min-h-[60px] max-h-[120px]" 
-            xmlns="http://www.w3.org/2000/svg" 
-            xmlnsXlink="http://www.w3.org/1999/xlink" 
-            viewBox="0 24 150 28" 
-            preserveAspectRatio="none"
-          >
-            <defs>
-              <path id="wave-path" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z"></path>
-            </defs>
-            <g className="animate-wave1">
-              <use xlinkHref="#wave-path" x="50" y="3" fill="rgba(10, 114, 148, 0.025)"></use>
-            </g>
-            <g className="animate-wave2">
-              <use xlinkHref="#wave-path" x="50" y="0" fill="rgba(34, 179, 173, 0.04)"></use>
-            </g>
-            <g className="animate-wave3">
-              <use xlinkHref="#wave-path" x="50" y="9" fill="#ffffff"></use>
-            </g>
+          <svg className="relative block w-full h-[8vh] min-h-[60px] max-h-[120px]" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none">
+            <defs><path id="wave-path" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z"></path></defs>
+            <g className="animate-wave1"><use xlinkHref="#wave-path" x="50" y="3" fill="rgba(10, 114, 148, 0.025)"></use></g>
+            <g className="animate-wave2"><use xlinkHref="#wave-path" x="50" y="0" fill="rgba(34, 179, 173, 0.04)"></use></g>
+            <g className="animate-wave3"><use xlinkHref="#wave-path" x="50" y="9" fill="#ffffff"></use></g>
           </svg>
         </div>
-
-        {/* --- INVISIBLE SVG FILTER FOR BLOB BUTTON --- */}
         <svg xmlns="http://www.w3.org/2000/svg" version="1.1" className="absolute w-0 h-0">
           <defs>
             <filter id="goo">
@@ -441,7 +335,6 @@ const HomePage = () => {
             </filter>
           </defs>
         </svg>
-
       </div>
 
       {/* ========================================== */}
@@ -449,119 +342,72 @@ const HomePage = () => {
       {/* ========================================== */}
       <section className="w-full bg-white relative z-20 pt-10 pb-24 font-sans -mt-[2px]">
         <div className="mx-auto max-w-7xl px-6">
-          
-          {/* Header Row */}
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-20">
             <div className="max-w-2xl" data-aos="fade-down">
-              
               <div className="flex items-center gap-2 mb-4">
                 <span className="h-2 w-2 rounded-full bg-[#16B3AA]"></span>
                 <span className="text-[11px] font-bold text-[#16B3AA] tracking-[0.15em] uppercase">Live Community Stats</span>
               </div>
-              
               <h2 className="text-4xl sm:text-[3.25rem] font-black text-[#0A0A0A] tracking-[-0.03em] leading-[1.1] mb-5">
-                Real-time API momentum, <br className="hidden sm:block" />
-                visualized.
+                Real-time API momentum, <br className="hidden sm:block" />visualized.
               </h2>
               <p className="text-[1.1rem] text-[#52525B] max-w-[500px] leading-relaxed font-medium">
                 Watch the network grow with every call, deploy, and merge. Designed for builders who love beautiful telemetry.
               </p>
             </div>
             
-            {/* Updates indicator */}
             <div className="relative pb-3 w-fit" data-aos="fade-down" data-aos-delay="100">
               <span className="text-[13px] font-medium text-[#71717A] mb-1 block">Updates every few seconds</span>
               <div className="absolute bottom-0 left-0 h-[2px] w-full bg-[#F4F4F5] overflow-hidden">
-                <motion.div 
-                  className="h-full bg-[#0A7294]" 
-                  style={{ width: "100%" }}
-                  animate={{ x: ["-100%", "0%", "100%"] }} 
-                  transition={{ duration: 3, ease: "linear", repeat: Infinity }} 
-                />
+                <motion.div className="h-full bg-[#0A7294]" style={{ width: "100%" }} animate={{ x: ["-100%", "0%", "100%"] }} transition={{ duration: 3, ease: "linear", repeat: Infinity }} />
               </div>
             </div>
           </div>
 
           <hr className="border-[#F4F4F5] mb-16" />
 
-         {/* Stats Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            
-            {/* Stat Card 1 */}
             <div data-aos="fade-up" data-aos-delay="0" className="group relative p-[2px] rounded-[2rem] hover:-translate-y-1 transition-all duration-300 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_16px_40px_rgba(0,0,0,0.08)]">
-              {/* The Hover Gradient Border */}
               <div className="absolute inset-0 bg-gradient-to-r from-[#0284C7] to-[#22B3AD] rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              
-              {/* Inner White Card */}
               <div className="flex flex-col relative bg-white p-7 sm:p-8 rounded-[calc(2rem-2px)] h-full z-10">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#F0F9FF] mb-6">
-                  <Activity strokeWidth={2} className="h-6 w-6 text-[#0284C7]" />
-                </div>
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#F0F9FF] mb-6"><Activity strokeWidth={2} className="h-6 w-6 text-[#0284C7]" /></div>
                 <div className="text-[11px] font-bold text-[#A1A1AA] tracking-[0.15em] uppercase mb-2">Daily API Calls</div>
-                <div className="text-[3.25rem] font-black text-[#0A0A0A] tracking-[-0.04em] leading-none mb-5">
-                  15M<span className="text-[#0284C7]">+</span>
-                </div>
+                <div className="text-[3.25rem] font-black text-[#0A0A0A] tracking-[-0.04em] leading-none mb-5">15M<span className="text-[#0284C7]">+</span></div>
                 <div className="flex items-center mt-auto text-[13px] font-medium text-[#71717A] bg-gray-50/80 px-3 py-2 rounded-xl border border-gray-100 w-fit">
-                  <Zap className="h-4 w-4 text-[#10B981] mr-1.5" fill="currentColor" />
-                  <span className="text-[#10B981] font-bold mr-1.5">+18%</span> vs last week
+                  <Zap className="h-4 w-4 text-[#10B981] mr-1.5" fill="currentColor" /><span className="text-[#10B981] font-bold mr-1.5">+18%</span> vs last week
                 </div>
               </div>
             </div>
 
-            {/* Stat Card 2 */}
             <div data-aos="fade-up" data-aos-delay="100" className="group relative p-[2px] rounded-[2rem] hover:-translate-y-1 transition-all duration-300 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_16px_40px_rgba(0,0,0,0.08)]">
               <div className="absolute inset-0 bg-gradient-to-r from-[#A855F7] to-[#ec4899] rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              
               <div className="flex flex-col relative bg-white p-7 sm:p-8 rounded-[calc(2rem-2px)] h-full z-10">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#FAF5FF] mb-6">
-                  <Globe strokeWidth={2} className="h-6 w-6 text-[#A855F7]" />
-                </div>
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#FAF5FF] mb-6"><Globe strokeWidth={2} className="h-6 w-6 text-[#A855F7]" /></div>
                 <div className="text-[11px] font-bold text-[#A1A1AA] tracking-[0.15em] uppercase mb-2">Active Regions</div>
-                <div className="text-[3.25rem] font-black text-[#0A0A0A] tracking-[-0.04em] leading-none mb-5">
-                  120<span className="text-[#A855F7]">+</span>
-                </div>
-                <div className="mt-auto text-[13px] font-medium text-[#71717A] bg-gray-50/80 px-3 py-2 rounded-xl border border-gray-100 w-fit">
-                  Edge-optimized delivery
-                </div>
+                <div className="text-[3.25rem] font-black text-[#0A0A0A] tracking-[-0.04em] leading-none mb-5">120<span className="text-[#A855F7]">+</span></div>
+                <div className="mt-auto text-[13px] font-medium text-[#71717A] bg-gray-50/80 px-3 py-2 rounded-xl border border-gray-100 w-fit">Edge-optimized delivery</div>
               </div>
             </div>
 
-            {/* Stat Card 3 */}
             <div data-aos="fade-up" data-aos-delay="200" className="group relative p-[2px] rounded-[2rem] hover:-translate-y-1 transition-all duration-300 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_16px_40px_rgba(0,0,0,0.08)]">
               <div className="absolute inset-0 bg-gradient-to-r from-[#10B981] to-[#3b82f6] rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              
               <div className="flex flex-col relative bg-white p-7 sm:p-8 rounded-[calc(2rem-2px)] h-full z-10">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#ECFDF5] mb-6">
-                  <Shield strokeWidth={2} className="h-6 w-6 text-[#10B981]" />
-                </div>
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#ECFDF5] mb-6"><Shield strokeWidth={2} className="h-6 w-6 text-[#10B981]" /></div>
                 <div className="text-[11px] font-bold text-[#A1A1AA] tracking-[0.15em] uppercase mb-2">System Uptime</div>
-                <div className="text-[3.25rem] font-black text-[#0A0A0A] tracking-[-0.04em] leading-none mb-5 flex items-baseline">
-                  99.99<span className="text-3xl text-[#10B981] ml-1">%</span>
-                </div>
-                <div className="mt-auto text-[13px] font-medium text-[#71717A] bg-gray-50/80 px-3 py-2 rounded-xl border border-gray-100 w-fit">
-                  Self-healing infrastructure
-                </div>
+                <div className="text-[3.25rem] font-black text-[#0A0A0A] tracking-[-0.04em] leading-none mb-5 flex items-baseline">99.99<span className="text-3xl text-[#10B981] ml-1">%</span></div>
+                <div className="mt-auto text-[13px] font-medium text-[#71717A] bg-gray-50/80 px-3 py-2 rounded-xl border border-gray-100 w-fit">Self-healing infrastructure</div>
               </div>
             </div>
 
-            {/* Stat Card 4 */}
             <div data-aos="fade-up" data-aos-delay="300" className="group relative p-[2px] rounded-[2rem] hover:-translate-y-1 transition-all duration-300 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_16px_40px_rgba(0,0,0,0.08)]">
               <div className="absolute inset-0 bg-gradient-to-r from-[#F97316] to-[#facc15] rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              
               <div className="flex flex-col relative bg-white p-7 sm:p-8 rounded-[calc(2rem-2px)] h-full z-10">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#FFF7ED] mb-6">
-                  <Cpu strokeWidth={2} className="h-6 w-6 text-[#F97316]" />
-                </div>
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#FFF7ED] mb-6"><Cpu strokeWidth={2} className="h-6 w-6 text-[#F97316]" /></div>
                 <div className="text-[11px] font-bold text-[#A1A1AA] tracking-[0.15em] uppercase mb-2">Builders Online</div>
-                <div className="text-[3.25rem] font-black text-[#0A0A0A] tracking-[-0.04em] leading-none mb-5">
-                  10k<span className="text-[#F97316]">+</span>
-                </div>
-                <div className="mt-auto text-[13px] font-medium text-[#71717A] bg-gray-50/80 px-3 py-2 rounded-xl border border-gray-100 w-fit">
-                  Pairing, shipping, scaling
-                </div>
+                <div className="text-[3.25rem] font-black text-[#0A0A0A] tracking-[-0.04em] leading-none mb-5">10k<span className="text-[#F97316]">+</span></div>
+                <div className="mt-auto text-[13px] font-medium text-[#71717A] bg-gray-50/80 px-3 py-2 rounded-xl border border-gray-100 w-fit">Pairing, shipping, scaling</div>
               </div>
             </div>
-
           </div>
         </div>
       </section>
@@ -569,23 +415,18 @@ const HomePage = () => {
       {/* ========================================== */}
       {/* 3. PREMIUM "STAY CONNECTED" FORM SECTION   */}
       {/* ========================================== */}
-      {/* --- ID ADDED HERE SO THE BUTTON SCROLLS TO THIS EXACT SPOT --- */}
       <section id="join-form" className="w-full bg-[#FAFAFA] relative z-20 py-20 lg:py-32 font-sans border-t border-gray-100 overflow-hidden">
         
-        {/* Decorative Background Elements */}
         <div className="absolute top-0 right-0 w-full h-full overflow-hidden pointer-events-none">
           <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-[#0A7294]/[0.06] to-transparent blur-[80px]"></div>
           <div className="absolute bottom-[-10%] left-[-5%] w-[600px] h-[600px] rounded-full bg-gradient-to-tr from-[#22B3AD]/[0.06] to-transparent blur-[100px]"></div>
-          {/* Subtle Grid Pattern */}
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)]"></div>
         </div>
 
         <div className="mx-auto max-w-7xl px-6 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-8 items-center">
             
-            {/* Left Side: Copy & Context (Takes up 5 columns on desktop) */}
             <div data-aos="fade-right" className="lg:col-span-5 flex flex-col justify-center text-center lg:text-left">
-              
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-gray-200 shadow-sm mb-8 mx-auto lg:mx-0 w-fit">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF9A3D] opacity-75"></span>
@@ -593,17 +434,13 @@ const HomePage = () => {
                 </span>
                 <span className="text-[11px] font-bold text-[#52525B] tracking-[0.2em] uppercase">Join The Network</span>
               </div>
-              
               <h2 className="text-4xl sm:text-[3.25rem] font-black text-[#0A0A0A] tracking-[-0.03em] leading-[1.1] mb-6">
                 Let's build the <br className="hidden sm:block" />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#0A7294] to-[#22B3AD]">future together.</span>
               </h2>
-              
               <p className="text-[1.1rem] text-[#52525B] leading-relaxed mb-10 max-w-lg mx-auto lg:mx-0">
                 Whether you're a seasoned architect or just starting out, there's a place for you here. Tell us how you'd like to get involved.
               </p>
-
-              {/* Eye-Catching Community Avatars */}
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-8">
                 <div className="flex -space-x-4">
                   {[1, 2, 3, 4].map((i) => (
@@ -619,18 +456,16 @@ const HomePage = () => {
               </div>
             </div>
 
-            {/* Right Side: The Premium Form (Takes up 7 columns on desktop) */}
+            {/* --- CONNECTED FORM --- */}
             <div data-aos="fade-left" data-aos-delay="100" className="lg:col-span-7 lg:pl-10 relative">
-              
-              {/* Animated Glow Behind Form */}
               <div className="absolute -inset-1 bg-gradient-to-r from-[#0A7294] via-[#22B3AD] to-[#FF9A3D] rounded-[2.5rem] blur-xl opacity-20 animate-pulse"></div>
               
-              {/* Form Card */}
               <div className="relative bg-white p-8 sm:p-10 rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] border border-white/60 backdrop-blur-xl">
-                <form className="space-y-5">
+                
+                {/* --- NEW: ADDED onSubmit to form --- */}
+                <form onSubmit={handleFormSubmit} className="space-y-5">
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    {/* Name Field */}
                     <div className="relative group">
                       <label className="block text-[12px] font-bold text-[#A1A1AA] uppercase tracking-wider mb-2 ml-1">Your Name</label>
                       <div className="relative">
@@ -639,13 +474,16 @@ const HomePage = () => {
                         </div>
                         <input 
                           type="text" 
+                          name="name" // Added name
+                          value={formData.name} // Bound to state
+                          onChange={handleInputChange} // Added handler
+                          required // Added required
                           placeholder="John Doe" 
                           className="w-full pl-12 pr-5 py-4 rounded-2xl border border-gray-100 bg-gray-50/50 hover:bg-gray-50 focus:bg-white focus:border-[#22B3AD] focus:ring-4 focus:ring-[#22B3AD]/10 outline-none transition-all text-[#0A0A0A] placeholder-gray-400 font-medium text-[15px]"
                         />
                       </div>
                     </div>
                     
-                    {/* Phone Field */}
                     <div className="relative group">
                       <label className="block text-[12px] font-bold text-[#A1A1AA] uppercase tracking-wider mb-2 ml-1">Phone Number</label>
                       <div className="relative">
@@ -654,6 +492,10 @@ const HomePage = () => {
                         </div>
                         <input 
                           type="tel" 
+                          name="phone" // Added name
+                          value={formData.phone} // Bound to state
+                          onChange={handleInputChange} // Added handler
+                          required // Added required
                           placeholder="+91 1234567890" 
                           className="w-full pl-12 pr-5 py-4 rounded-2xl border border-gray-100 bg-gray-50/50 hover:bg-gray-50 focus:bg-white focus:border-[#22B3AD] focus:ring-4 focus:ring-[#22B3AD]/10 outline-none transition-all text-[#0A0A0A] placeholder-gray-400 font-medium text-[15px]"
                         />
@@ -661,7 +503,6 @@ const HomePage = () => {
                     </div>
                   </div>
 
-                  {/* Email Field */}
                   <div className="relative group">
                     <label className="block text-[12px] font-bold text-[#A1A1AA] uppercase tracking-wider mb-2 ml-1">Email Address</label>
                     <div className="relative">
@@ -670,28 +511,36 @@ const HomePage = () => {
                       </div>
                       <input 
                         type="email" 
+                        name="email" // Added name
+                        value={formData.email} // Bound to state
+                        onChange={handleInputChange} // Added handler
+                        required // Added required
                         placeholder="john@example.com" 
                         className="w-full pl-12 pr-5 py-4 rounded-2xl border border-gray-100 bg-gray-50/50 hover:bg-gray-50 focus:bg-white focus:border-[#22B3AD] focus:ring-4 focus:ring-[#22B3AD]/10 outline-none transition-all text-[#0A0A0A] placeholder-gray-400 font-medium text-[15px]"
                       />
                     </div>
                   </div>
 
-                  {/* Interest Select Dropdown */}
                   <div className="relative group">
                     <label className="block text-[12px] font-bold text-[#A1A1AA] uppercase tracking-wider mb-2 ml-1">Your Interest</label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
                         <Sparkles className="h-5 w-5 text-gray-400 group-focus-within:text-[#0A7294] transition-colors" />
                       </div>
-                      <select className="w-full pl-12 pr-10 py-4 rounded-2xl border border-gray-100 bg-gray-50/50 hover:bg-gray-50 focus:bg-white focus:border-[#22B3AD] focus:ring-4 focus:ring-[#22B3AD]/10 outline-none transition-all text-[#0A0A0A] font-medium text-[15px] appearance-none cursor-pointer relative z-0">
-                        <option value="" disabled selected>Select an option...</option>
+                      <select 
+                        name="intrest" // Added name
+                        value={formData.intrest} // Bound to state
+                        onChange={handleInputChange} // Added handler
+                        required // Added required
+                        className="w-full pl-12 pr-10 py-4 rounded-2xl border border-gray-100 bg-gray-50/50 hover:bg-gray-50 focus:bg-white focus:border-[#22B3AD] focus:ring-4 focus:ring-[#22B3AD]/10 outline-none transition-all text-[#0A0A0A] font-medium text-[15px] appearance-none cursor-pointer relative z-0"
+                      >
+                        <option value="" disabled>Select an option...</option>
+                        {/* --- NEW: Values matched EXACTLY to your backend enum --- */}
                         <option value="volunteer">Volunteer</option>
-                        <option value="management">Management</option>
-                        <option value="social-media">Social Media</option>
-                        <option value="content-creation">Content Creation</option>
-                        <option value="design">Design</option>
+                        <option value="Management">Management</option>
+                        <option value="Social Creation">Social Creation</option>
+                        <option value="Design">Design</option>
                       </select>
-                      {/* Custom Chevron for Dropdown */}
                       <div className="absolute inset-y-0 right-5 flex items-center pointer-events-none z-10">
                         <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
@@ -700,16 +549,17 @@ const HomePage = () => {
                     </div>
                   </div>
 
-                  {/* Submit Button */}
+                  {/* --- NEW: Changed to type="submit" and added disabled state --- */}
                   <button 
-                    type="button" 
-                    className="w-full mt-4 relative overflow-hidden group flex items-center justify-center gap-2 bg-[#0A0A0A] text-white font-bold py-4.5 px-8 rounded-2xl transition-all duration-300 hover:shadow-[0_10px_40px_-10px_rgba(10,114,148,0.8)] hover:-translate-y-1"
+                    type="submit" 
+                    disabled={isSubmitting}
+                    className="w-full mt-4 relative overflow-hidden group flex items-center justify-center gap-2 bg-[#0A0A0A] text-white font-bold py-4.5 px-8 rounded-2xl transition-all duration-300 hover:shadow-[0_10px_40px_-10px_rgba(10,114,148,0.8)] hover:-translate-y-1 disabled:opacity-70 disabled:hover:-translate-y-0"
                   >
-                    {/* Hover Gradient Background */}
                     <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#0A7294] to-[#22B3AD] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    
-                    <span className="relative z-10 text-[16px]">Submit Application</span>
-                    <ArrowRight className="w-5 h-5 relative z-10 transition-transform duration-300 group-hover:translate-x-1.5" />
+                    <span className="relative z-10 text-[16px] py-4">
+                      {isSubmitting ? "Submitting..." : "Submit Application"}
+                    </span>
+                    {!isSubmitting && <ArrowRight className="w-5 h-5 relative z-10 transition-transform duration-300 group-hover:translate-x-1.5" />}
                   </button>
                   
                   <p className="text-center text-xs font-medium text-gray-400 mt-4">

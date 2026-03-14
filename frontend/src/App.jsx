@@ -20,6 +20,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminLayout from './layouts/AdminLayout';
 import ManageEvents from './pages/admin/ManageEvents';
 import AddEvent from './pages/admin/AddEvent';
+import ManageApplicants from './pages/admin/ManageApplicants';
 
 // Protected Route Component (Make sure this path is correct for your project)
 import ProtectedRoute from './components/admin/ProtectedRoute';
@@ -79,6 +80,7 @@ function App() {
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="events" element={<ManageEvents />} />
             <Route path="add-event" element={<AddEvent />} />
+            <Route path="applicants" element={<ManageApplicants />} />
           </Route>
         </Route>
         
