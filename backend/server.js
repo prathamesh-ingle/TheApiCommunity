@@ -13,9 +13,11 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: "http://localhost:5173", // MUST match your exact React frontend URL
-  credentials: true,               // 🚨 REQUIRED for the backend to send cookies
-}));; // Added so your React app can talk to the backend
+  // Automatically uses your Vercel URL in production, or localhost when testing locally
+  origin: process.env.FRONTEND_URL || "http://localhost:5173", 
+  credentials: true, // 🚨 REQUIRED for the backend to send/receive HttpOnly cookies
+}));
+
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
