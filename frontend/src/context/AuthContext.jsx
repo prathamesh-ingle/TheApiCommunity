@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext();
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5001/api";
+
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -24,7 +26,7 @@ export const AuthProvider = ({ children }) => {
 const logout = async () => {
     try {
       // 1. Tell the backend to kill the cookie
-      await fetch("http://localhost:5001/api/admin/logout", {
+      await fetch(`${API_BASE_URL}/admin/logout`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include", // 🚨 REQUIRED: Tells browser to accept the "delete cookie" command
