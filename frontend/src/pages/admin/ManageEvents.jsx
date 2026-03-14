@@ -160,7 +160,8 @@ const handleUpdateSubmit = async ({ formData, eventImages, speakers }) => {
   {editingEvent && (
     <motion.div 
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-sm flex justify-center items-center p-2 sm:p-6"
+      // FIX: Changed z-[100] to z-[9999] so it floats above the Navbar
+      className="fixed inset-0 z-[9999] bg-slate-900/40 backdrop-blur-sm flex justify-center items-center p-2 sm:p-6"
     >
       <motion.div 
         initial={{ y: 20, opacity: 0, scale: 0.95 }} 
@@ -199,7 +200,8 @@ const handleUpdateSubmit = async ({ formData, eventImages, speakers }) => {
   {viewingEvent && (
     <motion.div 
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-sm flex justify-center items-center p-2 sm:p-6"
+      // FIX: Changed z-[100] to z-[9999] so it floats above the Navbar
+      className="fixed inset-0 z-[9999] bg-slate-900/40 backdrop-blur-sm flex justify-center items-center p-2 sm:p-6"
     >
       <motion.div 
         initial={{ y: 20, opacity: 0, scale: 0.95 }} 
@@ -284,7 +286,7 @@ const handleUpdateSubmit = async ({ formData, eventImages, speakers }) => {
       <div className="max-w-[1600px] mx-auto space-y-6">
         
         {/* --- HEADER --- */}
-        <div className="sticky top-4 z-50 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white/80 backdrop-blur-xl px-6 py-4 rounded-[1.5rem] border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+        <div className="sticky top-4 z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white/80 backdrop-blur-xl px-6 py-4 rounded-[1.5rem] border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#065069] to-[#0A7294] shadow-lg shadow-[#0A7294]/20 flex items-center justify-center text-white"><Activity size={22} /></div>
             <div>
