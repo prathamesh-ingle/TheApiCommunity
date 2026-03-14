@@ -1,3 +1,4 @@
+//backend/src/controllers/user.controller.js
 import express from 'express';
 import Applicant from '../models/ApplicantModel.js';
 

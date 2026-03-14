@@ -1,7 +1,9 @@
+//frontend/src/components/admin/Navbar.jsx
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogOut, Settings, Bell, Menu, Search, User2 } from "lucide-react";
 import toast from "react-hot-toast";
+import { logoutAdmin } from "../../api/adminApi";
 
 const Navbar = ({ onToggleSidebar }) => {
   const navigate = useNavigate();
@@ -17,10 +19,15 @@ const Navbar = ({ onToggleSidebar }) => {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [open]);
 
-  const handleLogout = () => {
-    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    toast.success("Logged out successfully");
-    window.location.href = "/";
+  const handleLogout = async () => {
+    try {
+      // 2. Corrected the function call here 👇
+      await logoutAdmin(); 
+      toast.success("Logged out successfully");
+      navigate("/admin/login"); 
+    } catch (error) {
+      toast.error("Failed to securely logout. Please try again.");
+    }
   };
 
   return (

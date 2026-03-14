@@ -1,3 +1,4 @@
+//backend/src/models/AdminModel.js
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 const adminSchema =new mongoose.Schema(

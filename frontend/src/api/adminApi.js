@@ -1,3 +1,4 @@
+//frontend/src/api/adminApi.js
 import axios from "axios";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5001/api";
@@ -15,5 +16,7 @@ export const getAllApplicants = () => adminApi.get("/applicants");
 export const createEvent = (data) => adminApi.post("/add-event", data, { headers: { 'Content-Type': 'multipart/form-data' } });
 export const updateEvent = (id, data) => adminApi.put(`/update-event/${id}`, data, { headers: { 'Content-Type': 'multipart/form-data' } });
 export const deleteEvent = (id) => adminApi.delete(`/delete-event/${id}`);
+export const checkAuth = () => adminApi.get("/check-auth");
+export const logoutAdmin = () => adminApi.post("/logout");
 
 export default adminApi;

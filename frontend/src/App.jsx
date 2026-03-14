@@ -9,13 +9,14 @@ import BackToTop from "./components/BackToTop";
 
 // Pages
 import HomePage from "./pages/HomePage";
-import AboutPage from "./pages/AboutPage"; 
+import AboutPage from "./pages/AboutPage";
 import TeamPage from "./pages/TeamPage";
 import SpeakersPage from "./pages/SpeakersPage";
 
 //Admin pages
 import LoginPage from './pages/admin/LoginPage';
 //admin
+import ProtectedRoute from './components/admin/ProtectedRoute';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminLayout from './layouts/AdminLayout';
 import ManageEvents from './pages/admin/ManageEvents';
@@ -41,7 +42,7 @@ const PublicLayout = () => {
     <div className="flex flex-col min-h-screen">
       <Navbar />
       <div className="flex-grow">
-        <Outlet /> 
+        <Outlet />
       </div>
       <Footer />
       <BackToTop />
@@ -50,7 +51,7 @@ const PublicLayout = () => {
 };
 
 function App() {
-  const location=useLocation();
+  const location = useLocation();
   location.pathname.startsWith("/admin");
   return (
     <>
@@ -65,17 +66,18 @@ function App() {
           <Route path="/speakers" element={<SpeakersPage />} />
           <Route path="/team" element={<TeamPage />} />
         </Route>
-        <Route path="/admin/login" element={<LoginPage/>}></Route>
+        <Route path="/admin/login" element={<LoginPage />}></Route>
 
-        <Route path="/admin" element={<AdminLayout />}>
-    <Route path="dashboard" element={<AdminDashboard />} />
-    <Route path="events" element={<ManageEvents />} />
-    <Route path="add-event" element={<AddEvent />} />
-    {/* Add other admin routes here later like /admin/events */}
-</Route>
+        <Route element={<ProtectedRoute />}>
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="events" element={<ManageEvents />} />
+            <Route path="add-event" element={<AddEvent />} />
+          </Route>
+        </Route>
       </Routes>
 
-      
+
     </>
   );
 }
