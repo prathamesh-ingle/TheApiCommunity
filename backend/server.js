@@ -12,7 +12,10 @@ import connectDB from "./lib/db.js";
 const app = express();
 
 // Middleware
-app.use(cors({ origin: true, credentials: true })); // Added so your React app can talk to the backend
+app.use(cors({
+  origin: "http://localhost:5173", // MUST match your exact React frontend URL
+  credentials: true,               // 🚨 REQUIRED for the backend to send cookies
+}));; // Added so your React app can talk to the backend
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

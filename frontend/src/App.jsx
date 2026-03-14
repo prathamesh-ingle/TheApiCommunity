@@ -14,14 +14,15 @@ import TeamPage from "./pages/TeamPage";
 import SpeakersPage from "./pages/SpeakersPage";
 import EventsPage from "./pages/EventsPage";
 
-//Admin pages
+// Admin pages
 import LoginPage from './pages/admin/LoginPage';
-//admin
-import ProtectedRoute from './components/admin/ProtectedRoute';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminLayout from './layouts/AdminLayout';
 import ManageEvents from './pages/admin/ManageEvents';
 import AddEvent from './pages/admin/AddEvent';
+
+// Protected Route Component (Make sure this path is correct for your project)
+import ProtectedRoute from './components/admin/ProtectedRoute';
 
 // --- HELPER COMPONENT: Scrolls to top on route change ---
 const ScrollToTop = () => {
@@ -52,8 +53,6 @@ const PublicLayout = () => {
 };
 
 function App() {
-  const location = useLocation();
-  location.pathname.startsWith("/admin");
   return (
     <>
       {/* ScrollToTop helper ensures every new page starts at the top */}
@@ -61,6 +60,8 @@ function App() {
 
       {/* Main Routing */}
       <Routes>
+        
+        {/* --- PUBLIC ROUTES --- */}
         <Route element={<PublicLayout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<AboutPage />} />
@@ -68,8 +69,11 @@ function App() {
           <Route path="/team" element={<TeamPage />} />
           <Route path="/events" element={<EventsPage />} />
         </Route>
-        <Route path="/admin/login" element={<LoginPage />}></Route>
 
+        {/* --- ADMIN LOGIN --- */}
+        <Route path="/admin/login" element={<LoginPage />} />
+
+        {/* --- PROTECTED ADMIN ROUTES --- */}
         <Route element={<ProtectedRoute />}>
           <Route path="/admin" element={<AdminLayout />}>
             <Route path="dashboard" element={<AdminDashboard />} />
@@ -77,9 +81,8 @@ function App() {
             <Route path="add-event" element={<AddEvent />} />
           </Route>
         </Route>
+        
       </Routes>
-
-
     </>
   );
 }

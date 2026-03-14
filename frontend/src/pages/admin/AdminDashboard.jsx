@@ -29,20 +29,27 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const hasToasted = useRef(false);
 
-  const fetchData = async () => {
-    try {
-      const [eventsRes, applicantsRes] = await Promise.all([
-        getAdminDashboard(),
-        getAllApplicants()
-      ]);
-      setEvents(eventsRes.data.events || []);
-      setApplicants(applicantsRes.data.data || []);
-    } catch (error) {
+ const fetchData = async () => {
+  try {
+    const [eventsRes, applicantsRes] = await Promise.all([
+      getAdminDashboard(),
+      getAllApplicants()
+    ]);
+    setEvents(eventsRes.data.events || []);
+    setApplicants(applicantsRes.data.data || []);
+  } catch (error) {
+    // If the token is expired or invalid
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      toast.error('Session expired. Please login again.');
+      // logout(); // Call your logout function from AuthContext if you have one
+      navigate('/admin/login');
+    } else {
       toast.error('Failed to sync dashboard data.');
-    } finally {
-      setLoading(false);
     }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchData();

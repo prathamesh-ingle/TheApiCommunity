@@ -4,8 +4,13 @@ import { useNavigate } from "react-router-dom";
 import { Mail, Lock, Eye, EyeOff, ArrowRight, KeyRound, ArrowLeft, RefreshCw } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 
+import { useAuth } from "../../context/AuthContext"; 
+
 const LoginPage = () => {
-  const [step, setStep] = useState(1); // 1 = Login, 2 = OTP
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
+  const [step, setStep] = useState(1); 
   const [form, setForm] = useState({ email: "", password: "" });
   const [otp, setOtp] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -31,6 +36,7 @@ const LoginPage = () => {
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
+  // --- STEP 1: SEND CREDENTIALS TO BACKEND ---
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
