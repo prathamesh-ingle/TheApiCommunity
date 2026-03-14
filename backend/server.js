@@ -12,11 +12,25 @@ import connectDB from "./lib/db.js";
 const app = express();
 
 // Middleware
-app.use(cors({
-  // Automatically uses your Vercel URL in production, or localhost when testing locally
-  origin: process.env.FRONTEND_URL || "http://localhost:5173", 
-  credentials: true, // 🚨 REQUIRED for the backend to send/receive HttpOnly cookies
-}));
+// Add your production frontend URL to this array
+const allowedOrigins = [
+  "http://localhost:5173", 
+  "https://the-api-community.vercel.app" // 👈 REPLACE THIS with your real frontend URL
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true, // This is mandatory to allow cookies to pass through
+  })
+);
 
 app.use(cookieParser());
 app.use(express.json());
