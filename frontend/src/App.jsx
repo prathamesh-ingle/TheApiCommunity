@@ -12,6 +12,7 @@ import HomePage from "./pages/HomePage";
 import AboutPage from "./pages/AboutPage";
 import TeamPage from "./pages/TeamPage";
 import SpeakersPage from "./pages/SpeakersPage";
+import EventsPage from "./pages/EventsPage";
 
 //Admin pages
 import LoginPage from './pages/admin/LoginPage';
@@ -65,6 +66,7 @@ function App() {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/speakers" element={<SpeakersPage />} />
           <Route path="/team" element={<TeamPage />} />
+          <Route path="/events" element={<EventsPage />} />
         </Route>
         <Route path="/admin/login" element={<LoginPage />}></Route>
 
