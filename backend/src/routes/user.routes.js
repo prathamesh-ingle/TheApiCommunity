@@ -1,10 +1,12 @@
 // backend/src/routes/user.routes.js
 import express from "express";
-import { ApplicationControler } from "../controllers/user.controller.js";
+import { ApplicationControler , getPublicEvents } from "../controllers/user.controller.js";
 
 const router = express.Router();
 
 router.post(`/application-form`, ApplicationControler);
+
+router.get(`/events`, getPublicEvents);
 
 router.get('/events', async (req, res) => {
     try {
