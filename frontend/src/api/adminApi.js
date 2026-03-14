@@ -1,4 +1,3 @@
-//frontend/src/api/adminApi.js
 import axios from "axios";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5001/api";
@@ -12,10 +11,11 @@ const adminApi = axios.create({
 export const getAdminDashboard = () => adminApi.get("/dashboard");
 export const getAllApplicants = () => adminApi.get("/applicants");
 
-// --- Add these for Events ---
-export const createEvent = (data) => adminApi.post("/add-event", data, { headers: { 'Content-Type': 'multipart/form-data' } });
-export const updateEvent = (id, data) => adminApi.put(`/update-event/${id}`, data, { headers: { 'Content-Type': 'multipart/form-data' } });
+// ⚠️ IMPORTANT: NO headers object here! Axios MUST auto-generate the multipart boundary.
+export const createEvent = (data) => adminApi.post("/add-event", data);
+export const updateEvent = (id, data) => adminApi.put(`/update-event/${id}`, data);
 export const deleteEvent = (id) => adminApi.delete(`/delete-event/${id}`);
+
 export const checkAuth = () => adminApi.get("/check-auth");
 export const logoutAdmin = () => adminApi.post("/logout");
 
