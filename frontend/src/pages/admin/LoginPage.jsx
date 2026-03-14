@@ -19,8 +19,7 @@ const LoginPage = () => {
   // States for Resend Logic
   const [timer, setTimer] = useState(60);
   const [isResending, setIsResending] = useState(false);
-  
-  const navigate = useNavigate();
+
   const otpRefs = useRef([]);
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5001/api";

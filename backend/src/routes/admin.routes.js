@@ -7,7 +7,8 @@ import {
     deleteEvent,
     getAdminDashboard,
     getAllApplicants,
-    AdminLogout
+    AdminLogout,
+    checkAuth
 } from "../controllers/admin.controller.js";
 import { upload } from "../middleware/upload.middleware.js";
 import { verifyAdmin } from "../middleware/auth.js";
@@ -27,8 +28,7 @@ router.get("/applicants", verifyAdmin, getAllApplicants);
 // http://localhost:5001/api/admin/check-auth
 router.get("/check-auth", verifyAdmin, checkAuth);
 
-// http://localhost:5001/api/admin/logout
-router.post("/logout", logoutAdmin);
+
 
 //http://localhost:5001/api/admin/applicants
 router.get("/applicants", verifyAdmin,getAllApplicants);
