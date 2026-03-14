@@ -2,13 +2,14 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   CalendarPlus, Download, Search, Edit3, Trash2, 
-  MapPin, Clock, Filter, Activity, Users
+  MapPin, Clock, Filter, Activity, Users,
+  X,Eye,Calendar
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import * as XLSX from "xlsx";
-import { getAdminDashboard, deleteEvent } from "../../api/adminApi";
-
+import { getAdminDashboard, deleteEvent, updateEvent } from "../../api/adminApi";
+import EventForm from "../../components/admin/EventForm.jsx";
 const containerVariants = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.1 } } };
 const cardVariants = { hidden: { opacity: 0, y: 15 }, show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } } };
 
@@ -79,14 +80,205 @@ const ManageEvents = () => {
     try {
       await deleteEvent(id);
       toast.success("Event deleted.", { id: tId });
+      window.location.reload();
       fetchEvents();
     } catch (error) {
       toast.error("Failed to delete.", { id: tId });
     }
   };
+  const [editingEvent, setEditingEvent] = useState(null);
+  const [viewingEvent, setViewingEvent] = useState(null);
+// Function to trigger when Edit is clicked
+const handleEditClick = (event) => {
+  setEditingEvent(event); // This opens the form and fills it with data
+};
+const handleUpdate = async (e) => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  const updatedData = Object.fromEntries(formData.entries());
+
+  const tId = toast.loading("Updating event...");
+  try {
+    // 2. Use the imported function
+    await updateEvent(editingEvent._id, updatedData);
+    
+    toast.success("Event updated!", { id: tId });
+    setEditingEvent(null); 
+    fetchEvents(); // Refresh the list automatically
+  } catch (error) {
+    toast.error("Update failed.", { id: tId });
+  }
+};
+const handleUpdateSubmit = async ({ formData, eventImages, speakers }) => {
+  const tId = toast.loading("Saving changes...");
+  try {
+    const data = new FormData();
+    
+    // 1. Append basic text fields
+    Object.keys(formData).forEach(key => {
+      // Don't append empty or old image URLs here
+      if (key !== 'eventImages' && key !== 'speakers') {
+        data.append(key, formData[key]);
+      }
+    });
+
+    // 2. Append New Gallery Images
+    if (eventImages.length > 0) {
+      eventImages.forEach(file => data.append("eventImages", file));
+    }
+
+    // 3. Handle Speakers
+    // We send speaker metadata as JSON, and images separately
+    const speakerJson = speakers.map(s => ({
+      name: s.name,
+      linkedIn_Profile: s.linkedIn_Profile,
+      bio: s.bio,
+      // Keep existing URL if no new file is uploaded
+      speaker_Image_Url: s.imageFile ? null : s.speaker_Image_Url 
+    }));
+    data.append("speakers", JSON.stringify(speakerJson));
+
+    speakers.forEach((s) => {
+      if (s.imageFile) data.append("speakerImages", s.imageFile);
+    });
+
+    // 4. Call your API (Ensure updateEvent is imported from adminApi)
+    await updateEvent(editingEvent._id, data);
+
+    toast.success("Event updated successfully!", { id: tId });
+    setEditingEvent(null); // Close the form
+    fetchEvents(); // Refresh the list
+  } catch (error) {
+    console.error(error);
+    toast.error(error.response?.data?.message || "Update failed.", { id: tId });
+  }
+};
 
   return (
     <div className="w-full min-h-screen bg-slate-50/50 font-sans pb-24 px-4 sm:px-6 lg:px-8 pt-6 selection:bg-[#0A7294]/20">
+<AnimatePresence>
+  {editingEvent && (
+    <motion.div 
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-sm flex justify-center items-center p-2 sm:p-6"
+    >
+      <motion.div 
+        initial={{ y: 20, opacity: 0, scale: 0.95 }} 
+        animate={{ y: 0, opacity: 1, scale: 1 }} 
+        exit={{ y: 20, opacity: 0, scale: 0.95 }}
+        // 1. Removed padding here, added flex-col and overflow-hidden
+        className="bg-slate-50/95 backdrop-blur-xl w-full max-w-6xl max-h-[95vh] rounded-[2rem] shadow-2xl border border-white relative flex flex-col overflow-hidden"
+      >
+        
+        {/* 2. THE FLUSH HEADER - No negative margins needed */}
+        <div className="bg-white z-10 px-5 py-4 sm:px-8 sm:py-6 flex justify-between items-center border-b border-slate-200 shrink-0">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Update Event</h2>
+            <p className="text-[10px] sm:text-xs font-bold text-[#0A7294] uppercase tracking-widest mt-1 truncate max-w-[200px] sm:max-w-md">Modifying: {editingEvent.title}</p>
+          </div>
+          <button onClick={() => setEditingEvent(null)} className="p-2 bg-slate-50 border border-slate-200 hover:bg-rose-50 hover:text-rose-500 hover:border-rose-200 rounded-full transition-all shadow-sm">
+             <X size={20} />
+          </button>
+        </div>
+
+        {/* 3. THE SCROLLING BODY - Padding is applied here instead */}
+        <div className="p-5 sm:p-8 overflow-y-auto custom-scrollbar">
+          <EventForm 
+            initialData={editingEvent} 
+            onSubmit={handleUpdateSubmit} 
+            isSubmitting={loading} 
+          />
+        </div>
+
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
+{/* THE VIEW EVENT MODAL */}
+<AnimatePresence>
+  {viewingEvent && (
+    <motion.div 
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-sm flex justify-center items-center p-2 sm:p-6"
+    >
+      <motion.div 
+        initial={{ y: 20, opacity: 0, scale: 0.95 }} 
+        animate={{ y: 0, opacity: 1, scale: 1 }} 
+        exit={{ y: 20, opacity: 0, scale: 0.95 }}
+        className="bg-slate-50/95 backdrop-blur-xl w-full max-w-5xl max-h-[95vh] rounded-[2rem] shadow-2xl border border-white relative flex flex-col overflow-hidden"
+      >
+        {/* Flush Header */}
+        <div className="bg-white z-10 px-5 py-5 sm:px-8 sm:py-6 flex justify-between items-center border-b border-slate-200 shrink-0 shadow-sm">
+          <div>
+            <div className="flex items-center gap-3 mb-1">
+              <span className={`text-[9px] font-black px-2.5 py-1 rounded uppercase tracking-widest ${new Date(viewingEvent.date) < new Date() ? 'text-slate-500 bg-slate-100' : 'text-[#0A7294] bg-[#F0F9FF] border border-[#BAE6FD]/50'}`}>
+                {new Date(viewingEvent.date) < new Date() ? 'Completed' : 'Upcoming'}
+              </span>
+              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5"><Calendar size={12}/> {new Date(viewingEvent.date).toLocaleDateString()}</p>
+            </div>
+            <h2 className="text-xl sm:text-3xl font-black text-slate-900 tracking-tight">{viewingEvent.title}</h2>
+          </div>
+          <button onClick={() => setViewingEvent(null)} className="p-2.5 bg-slate-50 border border-slate-200 hover:bg-rose-50 hover:text-rose-500 hover:border-rose-200 rounded-full transition-all shadow-sm">
+             <X size={20} />
+          </button>
+        </div>
+
+        {/* Scrolling Body */}
+        <div className="p-5 sm:p-8 overflow-y-auto custom-scrollbar space-y-8">
+          
+          {/* Detailed Info Card */}
+          <div className="bg-white p-6 sm:p-8 rounded-[2rem] border border-slate-100 shadow-sm space-y-6">
+            <h3 className="text-lg font-black text-[#0A7294] border-l-4 border-[#22B3AD] pl-4">{viewingEvent.short_Description}</h3>
+            <p className="text-sm font-medium text-slate-600 whitespace-pre-wrap leading-relaxed">
+              {viewingEvent.detailed_Description}
+            </p>
+            
+            <div className="flex flex-wrap gap-4 pt-4 border-t border-slate-100">
+              <div className="flex items-center gap-2 text-sm font-bold text-slate-700 bg-slate-50 px-4 py-2 rounded-xl border border-slate-200"><Clock size={16} className="text-[#22B3AD]"/> {viewingEvent.time}</div>
+              <div className="flex items-center gap-2 text-sm font-bold text-slate-700 bg-slate-50 px-4 py-2 rounded-xl border border-slate-200"><MapPin size={16} className="text-[#22B3AD]"/> {viewingEvent.event_Location}</div>
+            </div>
+          </div>
+
+          {/* Speakers Grid */}
+          {viewingEvent.speakers?.length > 0 && (
+            <div>
+              <h3 className="flex items-center gap-2 text-sm font-black text-slate-800 uppercase mb-5 ml-2"><Users size={18} className="text-[#FF9A3D]"/> Featured Speakers</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+                {viewingEvent.speakers.map((s, idx) => (
+                  <div key={idx} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4 group hover:border-[#BAE6FD] hover:shadow-md transition-all">
+                    <img src={s.speaker_Image_Url || "https://via.placeholder.com/150"} alt={s.name} className="w-16 h-16 rounded-full object-cover border-4 border-slate-50 shadow-sm group-hover:scale-105 transition-transform" />
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-sm font-black text-slate-800 truncate">{s.name}</h4>
+                      <p className="text-[11px] font-medium text-slate-500 line-clamp-2 mt-0.5">{s.bio}</p>
+                      {s.linkedIn_Profile && (
+                        <a href={s.linkedIn_Profile} target="_blank" rel="noreferrer" className="text-[10px] font-bold text-[#0A7294] uppercase tracking-widest hover:underline mt-2 inline-block">LinkedIn ↗</a>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Gallery Grid */}
+          {viewingEvent.eventImages?.length > 0 && (
+            <div>
+              <h3 className="flex items-center gap-2 text-sm font-black text-slate-800 uppercase mb-5 ml-2"><ImageIcon size={18} className="text-indigo-500"/> Event Gallery</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                {viewingEvent.eventImages.map((imgUrl, idx) => (
+                  <div key={idx} className="aspect-square rounded-2xl overflow-hidden border border-slate-200 shadow-sm group">
+                    <img src={imgUrl} alt="gallery" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+        </div>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
       <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-[#22B3AD]/10 via-[#0A7294]/5 to-transparent blur-[100px] pointer-events-none rounded-full -z-10"></div>
 
       <div className="max-w-[1600px] mx-auto space-y-6">
@@ -175,24 +367,18 @@ const ManageEvents = () => {
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-3">
-                      <div className="flex -space-x-3">
-                        {event.speakers?.slice(0, 3).map((s, i) => (
-                          <img key={i} src={s.speaker_Image_Url} alt={s.name} title={s.name} className="w-10 h-10 rounded-full border-2 border-white bg-slate-100 object-cover shadow-sm hover:scale-110 hover:z-10 transition-transform" />
-                        ))}
-                        {event.speakers?.length > 3 && (
-                          <div className="w-10 h-10 rounded-full bg-slate-50 border-2 border-white flex items-center justify-center text-[10px] font-black text-slate-500 shadow-sm">
-                            +{event.speakers.length - 3}
-                          </div>
-                        )}
-                      </div>
-                      {event.speakers?.length === 0 && <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-200 border-dashed flex items-center justify-center"><Users size={14} className="text-slate-300"/></div>}
-                    </div>
+                    <div className="flex items-center gap-2 text-[12px] font-bold text-slate-500 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
+  <Users size={14} className="text-[#FF9A3D]" />
+  {event.speakers?.length || 0} Speakers
+</div>
                   </div>
 
                   <div className="flex gap-2 w-full lg:w-auto justify-end mt-4 lg:mt-0">
                     {/* Assuming you will pass state or use a route to edit */}
-                    <button onClick={() => navigate(`/admin/edit-event/${event._id}`)} className="p-3 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-[#0A7294] hover:border-[#BAE6FD] hover:bg-[#F0F9FF] transition-all shadow-sm">
+                    <button onClick={() => setViewingEvent(event)} className="p-3 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-indigo-500 hover:border-indigo-200 hover:bg-indigo-50 transition-all shadow-sm" title="View Full Details">
+                   <Eye size={16} />
+                 </button>
+                    <button onClick={() => handleEditClick(event)} className="p-3 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-[#0A7294] hover:border-[#BAE6FD] hover:bg-[#F0F9FF] transition-all shadow-sm">
                       <Edit3 size={16} />
                     </button>
                     <button onClick={() => handleDelete(event._id)} className="p-3 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 transition-all shadow-sm">

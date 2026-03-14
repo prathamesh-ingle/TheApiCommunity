@@ -30,16 +30,26 @@ const Navbar = ({ onToggleSidebar }) => {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  // --- LOGOUT LOGIC ---
-  const handleLogout = async () => {
-    try {
-      await logoutAdmin(); 
-      toast.success("Logged out successfully");
-      navigate("/admin/login"); 
-    } catch (error) {
-      toast.error("Failed to securely logout. Please try again.");
-    }
-  };
+ const handleLogout = async () => {
+  try {
+    // 1. Send a request to the backend so IT can delete the HttpOnly cookie
+    await fetch("http://localhost:5001/api/admin/logout", {
+      method: "POST",
+      credentials: "include", // 🚨 MAGIC KEY: Tells the browser to send the cookie so the backend can destroy it
+    });
+
+    // 2. Clear your frontend session data
+    sessionStorage.removeItem("adminUser");
+    
+    // 3. Notify the user and redirect
+    toast.success("Logged out successfully");
+    window.location.href = "/";
+
+  } catch (error) {
+    console.error("Logout failed:", error);
+    toast.error("Something went wrong during logout.");
+  }
+};
 
   // --- SEARCH LOGIC ---
   const handleSearchFocus = async () => {

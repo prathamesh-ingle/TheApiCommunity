@@ -7,8 +7,7 @@ import {
     deleteEvent,
     getAdminDashboard,
     getAllApplicants,
-    checkAuth,      // <-- Added
-    logoutAdmin     // <-- Added
+    AdminLogout
 } from "../controllers/admin.controller.js";
 import { upload } from "../middleware/upload.middleware.js";
 import { verifyAdmin } from "../middleware/auth.js";
@@ -31,4 +30,8 @@ router.get("/check-auth", verifyAdmin, checkAuth);
 // http://localhost:5001/api/admin/logout
 router.post("/logout", logoutAdmin);
 
+//http://localhost:5001/api/admin/applicants
+router.get("/applicants", verifyAdmin,getAllApplicants);
+
+router.post("/logout",AdminLogout);
 export default router;

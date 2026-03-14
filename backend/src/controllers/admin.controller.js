@@ -15,11 +15,12 @@ const generateAdminToken = (id, email) => {
 
 // Set JWT in HTTP-only cookie
 const sendAdminCookie = (res, token) => {
-  res.cookie("token", token, {
+ res.cookie("token", token, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
+    // 🚨 Remove the maxAge line completely!
   });
 };
 
@@ -60,6 +61,17 @@ export const AdminLogin = async (req, res) => {
   }
 };
 
+export const AdminLogout = async (req,res)=>{
+  // Use clearCookie with the EXACT SAME options you used to create it
+  res.clearCookie("token", {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+  });
+  
+  res.status(200).json({ message: "Logged out successfully" });
+}
 // Verify OTP & Authenticate Admin
 export const verifyAdminLogin = async (req, res) => {
   try {
