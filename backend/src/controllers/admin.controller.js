@@ -14,13 +14,13 @@ const generateAdminToken = (id, email) => {
 };
 
 // Set JWT in HTTP-only cookie
+// Set JWT in HTTP-only cookie
 const sendAdminCookie = (res, token) => {
- res.cookie("token", token, {
+  res.cookie("token", token, {
     httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // 👈 Critical for cross-domain
+    secure: process.env.NODE_ENV === "production",                    // 👈 Critical for cross-domain
     path: "/",
-    // 🚨 Remove the maxAge line completely!
   });
 };
 
@@ -62,16 +62,14 @@ export const AdminLogin = async (req, res) => {
 };
 
 export const AdminLogout = async (req,res)=>{
-  // Use clearCookie with the EXACT SAME options you used to create it
-  res.clearCookie("token", {
+  res.clearCookie("token", { 
     httpOnly: true,
-    sameSite: "lax",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     secure: process.env.NODE_ENV === "production",
-    path: "/",
+    path: "/" 
   });
-  
-  res.status(200).json({ message: "Logged out successfully" });
-}
+  res.status(200).json({ success: true, message: "Logged out successfully" });
+};
 // Verify OTP & Authenticate Admin
 export const verifyAdminLogin = async (req, res) => {
   try {
