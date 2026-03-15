@@ -17,7 +17,7 @@ app.set("trust proxy", 1);
 // 🔥 Restoring your robust array-based CORS setup
 const allowedOrigins = [
   "http://localhost:5173", 
-  "https://theapicommunity.vercel.app" // Ensure there is NO trailing slash here
+  "https://theapicommunity.onrender.com" // Ensure there is NO trailing slash here
 ];
 
 // Add FRONTEND_URL from Render env variables if it exists
