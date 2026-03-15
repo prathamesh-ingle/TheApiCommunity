@@ -1,20 +1,22 @@
-//frontend/src/main.jsx
+// frontend/src/main.jsx
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css'; // Toastify styles
+import 'react-toastify/dist/ReactToastify.css';
 
 import App from './App.jsx';
-import './index.css'; // Your Tailwind and global CSS
+import './index.css';
+import { AuthProvider } from "./context/AuthContext"; // Import your new Context
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    {/* BrowserRouter must wrap the App since App.jsx only contains Routes */}
     <BrowserRouter>
-      <App />
+      {/* Wrap App with AuthProvider so the "Auth Brain" starts working */}
+      <AuthProvider>
+        <App />
+      </AuthProvider>
       
-      {/* Global Toast Notifications Config */}
       <ToastContainer 
         position="bottom-right" 
         autoClose={3000} 
@@ -25,7 +27,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         pauseOnFocusLoss 
         draggable 
         pauseOnHover 
-        theme="light" // Matches your soft, light template vibe
+        theme="light" 
       />
     </BrowserRouter>
   </React.StrictMode>,

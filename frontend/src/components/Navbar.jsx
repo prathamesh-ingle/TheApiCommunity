@@ -1,151 +1,220 @@
-// frontend/src/components/Navbar.jsx
-import { useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, ChevronRight, Zap } from 'lucide-react';
+import { Home, Info, Calendar, Mic, Users, ArrowRight } from 'lucide-react';
 
 const navItems = [
-  { label: 'About', to: '/about' },
-  { label: 'Events', to: '/events' },
-  { label: 'Blog', to: '/blog' },
-  { label: 'Contact', to: '/contact' },
+  { label: 'Home', to: '/', icon: Home },
+  { label: 'About', to: '/about', icon: Info },
+  { label: 'Events', to: '/events', icon: Calendar },
+  { label: 'Speakers', to: '/speakers', icon: Mic },
+  { label: 'Team', to: '/team', icon: Users },
 ];
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setIsOpen(false);
+  }, [location.pathname]);
+
+  // --- SMART SCROLL LOGIC ---
+  const scrollToForm = () => {
+    setIsOpen(false); // Close mobile menu if open
+    
+    if (location.pathname !== '/') {
+      // 1. Navigate to the homepage
+      navigate('/');
+      
+      // 2. Smart polling: check every 100ms if the form has loaded into the DOM
+      let checkCount = 0;
+      const checkInterval = setInterval(() => {
+        const form = document.getElementById("join-form");
+        if (form) {
+          form.scrollIntoView({ behavior: "smooth", block: "start" });
+          clearInterval(checkInterval); // Stop checking once found
+        }
+        checkCount++;
+        // Safety switch: stop checking after 20 attempts (2 seconds)
+        if (checkCount > 20) clearInterval(checkInterval); 
+      }, 100);
+
+    } else {
+      // If already on homepage, just scroll immediately
+      setTimeout(() => {
+        const form = document.getElementById("join-form");
+        if (form) form.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 50);
+    }
+  };
 
   return (
-    <motion.header
-      initial={{ y: -20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-      className="fixed top-0 z-[100] w-full border-b border-white/20 bg-white/70 backdrop-blur-xl transition-colors duration-300"
-    >
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        
-        {/* --- LOGO SECTION --- */}
-        <Link to="/" className="group flex items-center gap-3">
-          <div className="relative flex items-center justify-center">
-            <motion.img
-              whileHover={{ rotate: 12, scale: 1.1 }}
-              src="/logo.png"
-              alt="API Logo"
-              className="h-10 w-10 object-contain sm:h-12 sm:w-12"
-            />
-            {/* Soft glow behind logo */}
-            <div className="absolute inset-0 -z-10 bg-[#0A7294]/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          </div>
-          <div className="flex flex-col -space-y-1">
-            <span className="text-lg font-bold tracking-tight text-slate-900">
-              The API <span className="text-[#22B3AD]">Community</span>
-            </span>
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#FF9A3D]">Innovation Hub</span>
-          </div>
-        </Link>
-
-        {/* --- DESKTOP NAVIGATION --- */}
-        <nav className="hidden items-center gap-2 md:flex">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) =>
-                `relative px-5 py-2 text-sm font-semibold transition-all duration-300 rounded-full hover:text-[#0A7294] ${
-                  isActive ? 'text-[#0A7294]' : 'text-slate-600'
-                }`
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  <span className="relative z-10">{item.label}</span>
-                  {isActive && (
-                    <motion.div
-                      layoutId="nav-pill"
-                      className="absolute inset-0 rounded-full bg-[#0A7294]/5 border border-[#0A7294]/10 shadow-inner"
-                      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                    />
-                  )}
-                  {/* Subtle underline hover effect */}
-                  <motion.div 
-                    className="absolute bottom-1 left-1/2 h-[2px] w-0 bg-[#0A7294] -translate-x-1/2 rounded-full"
-                    whileHover={{ width: '40%' }}
-                  />
-                </>
-              )}
-            </NavLink>
-          ))}
-        </nav>
-
-        {/* --- RIGHT ACTION AREA --- */}
-        <div className="flex items-center gap-4">
-          <Link
-            to="/login"
-            className="group relative hidden overflow-hidden sm:flex items-center gap-2 rounded-full bg-[#1A1A1A] px-7 py-3 text-sm font-bold text-white shadow-lg transition-all hover:scale-[1.02] active:scale-95"
-          >
-            {/* Shimmer Effect */}
-            <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent group-hover:animate-[shimmer_1.5s_infinite]" />
-            
-            <Zap className="h-4 w-4 text-[#FF9A3D] fill-[#FF9A3D]" />
-            <span className="relative z-10">Join Community</span>
-            <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+    <>
+      {/* --- FIXED STATIC NAVBAR --- */}
+      <header className="fixed top-0 inset-x-0 z-[100] bg-white/80 backdrop-blur-xl border-b border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 h-16 lg:h-20 flex items-center justify-between">
+          
+          {/* --- LOGO SECTION --- */}
+          <Link to="/" className="group flex items-center gap-3 relative z-50">
+            <div className="relative flex items-center justify-center">
+              <img
+                src="/logo.png"
+                alt="API Logo"
+                className="h-8 w-8 sm:h-10 sm:w-10 object-contain transition-transform duration-500 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 -z-10 bg-gradient-to-tr from-[#0A7294] to-[#22B3AD] blur-xl rounded-full opacity-0 group-hover:opacity-30 transition-opacity duration-500" />
+            </div>
+            <div className="flex flex-col -space-y-1">
+              <span className="text-[15px] sm:text-[17px] font-black tracking-tight text-slate-800 group-hover:text-[#0A7294] transition-colors duration-300">
+                The API <span className="text-[#22B3AD]">Community</span>
+              </span>
+              <span className="text-[8px] sm:text-[9px] font-bold uppercase tracking-[0.2em] text-[#FF9A3D]">
+                Innovation Hub
+              </span>
+            </div>
           </Link>
 
-          {/* Mobile Menu Toggle */}
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white shadow-sm md:hidden"
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            {isOpen ? <X className="h-5 w-5 text-slate-900" /> : <Menu className="h-5 w-5 text-slate-600" />}
-          </motion.button>
-        </div>
-
-        {/* --- MOBILE OVERLAY MENU --- */}
-        <AnimatePresence>
-          {isOpen && (
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              className="fixed inset-0 top-[76px] z-40 flex h-[calc(100vh-76px)] w-full flex-col bg-white/95 p-8 backdrop-blur-2xl md:hidden"
-            >
-              <div className="flex flex-col gap-6 text-center">
-                {navItems.map((item, idx) => (
-                  <motion.div
-                    key={item.to}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.1 }}
-                  >
-                    <NavLink
-                      to={item.to}
-                      onClick={() => setIsOpen(false)}
-                      className={({ isActive }) => 
-                        `text-3xl font-extrabold tracking-tighter transition-colors ${
-                          isActive ? 'text-[#0A7294]' : 'text-slate-900'
-                        }`
-                      }
-                    >
+          {/* --- DESKTOP NAVIGATION (Soft Magic Underline) --- */}
+          <nav className="hidden lg:flex items-center gap-8 h-full">
+            {navItems.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className="relative flex items-center h-full text-[12px] font-bold uppercase tracking-widest text-slate-500 hover:text-[#0A7294] transition-colors duration-300 group"
+              >
+                {({ isActive }) => (
+                  <>
+                    <span className={isActive ? 'text-[#0A7294]' : ''}>
                       {item.label}
-                    </NavLink>
-                  </motion.div>
-                ))}
-                
-                <div className="mt-8 flex flex-col gap-4">
-                  <Link
-                    to="/login"
-                    onClick={() => setIsOpen(false)}
-                    className="flex w-full items-center justify-center gap-3 rounded-full bg-[#0A7294] py-5 text-xl font-bold text-white shadow-xl shadow-[#0A7294]/20"
-                  >
-                    Join now <ChevronRight />
-                  </Link>
-                </div>
+                    </span>
+                    
+                    {/* Active State Bottom Border */}
+                    {isActive && (
+                      <motion.div
+                        layoutId="active-nav-border"
+                        className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#0A7294] to-[#22B3AD] rounded-t-full"
+                        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                      />
+                    )}
+                    
+                    {/* Hover State Underline (Only shows if NOT active) */}
+                    {!isActive && (
+                      <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-slate-200 rounded-t-full opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300" />
+                    )}
+                  </>
+                )}
+              </NavLink>
+            ))}
+          </nav>
+
+          {/* --- RIGHT ACTION AREA --- */}
+          <div className="flex items-center gap-4 relative z-50">
+            {/* Join Button (Desktop) */}
+            <button 
+              onClick={scrollToForm}
+              className="hidden lg:flex items-center justify-center relative overflow-hidden group bg-slate-900 text-white px-6 py-2.5 rounded-full font-bold text-[12px] uppercase tracking-wider transition-all duration-300 shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(10,114,148,0.2)] hover:-translate-y-0.5 cursor-pointer"
+            >
+              <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#0A7294] to-[#22B3AD] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <span className="relative z-10">Join Community</span>
+            </button>
+
+            {/* Mobile Menu Toggle */}
+            <button
+              className={`lg:hidden relative w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300 cursor-pointer ${
+                isOpen ? 'bg-slate-100' : 'bg-slate-50/50 hover:bg-slate-100'
+              }`}
+              onClick={() => setIsOpen(!isOpen)}
+              aria-label="Toggle Menu"
+            >
+              <div className="flex flex-col items-center justify-center w-4 h-3.5 gap-[3.5px] relative">
+                <motion.span 
+                  animate={isOpen ? { rotate: 45, y: 5.5 } : { rotate: 0, y: 0 }} 
+                  className="w-full h-[2px] bg-slate-800 rounded-full block origin-center transition-all duration-300"
+                />
+                <motion.span 
+                  animate={isOpen ? { opacity: 0, x: 10 } : { opacity: 1, x: 0 }} 
+                  className="w-[70%] h-[2px] bg-slate-800 rounded-full block transition-all duration-300"
+                />
+                <motion.span 
+                  animate={isOpen ? { rotate: -45, y: -5.5 } : { rotate: 0, y: 0 }} 
+                  className="w-full h-[2px] bg-slate-800 rounded-full block origin-center transition-all duration-300"
+                />
+              </div>
+            </button>
+          </div>
+          
+        </div>
+      </header>
+
+      {/* --- MOBILE FLOATING DROPDOWN MENU --- */}
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            {/* Invisible Backdrop to close menu when clicking outside */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsOpen(false)}
+              className="fixed inset-0 z-[80] bg-slate-900/20 backdrop-blur-sm lg:hidden"
+            />
+
+            {/* Floating Glass Dropdown Card */}
+            <motion.div
+              initial={{ opacity: 0, y: -10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="fixed top-[72px] left-4 right-4 z-[90] bg-white/95 backdrop-blur-xl rounded-[1.5rem] shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)] border border-slate-100 p-3 flex flex-col gap-1 lg:hidden"
+            >
+              {/* Navigation Links */}
+              {navItems.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  className={({ isActive }) => 
+                    `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                      isActive 
+                        ? 'bg-slate-50/80 text-[#0A7294]' 
+                        : 'bg-transparent text-slate-600 active:bg-slate-50'
+                    }`
+                  }
+                >
+                  {({ isActive }) => (
+                    <>
+                      <item.icon 
+                        size={18} 
+                        strokeWidth={isActive ? 2.5 : 2} 
+                        className={isActive ? 'text-[#22B3AD]' : 'text-slate-400'}
+                      />
+                      <span className={`text-[15px] font-bold ${isActive ? 'text-[#0A7294]' : 'text-slate-700'}`}>
+                        {item.label}
+                      </span>
+                    </>
+                  )}
+                </NavLink>
+              ))}
+
+              {/* Mobile Join Button inside the dropdown */}
+              <div className="mt-2 pt-2 border-t border-slate-100">
+                <button 
+                  onClick={scrollToForm}
+                  className="w-full relative overflow-hidden group bg-slate-900 text-white py-3.5 px-4 rounded-xl font-bold text-[13px] uppercase tracking-wider flex items-center justify-center shadow-sm"
+                >
+                  <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#0A7294] to-[#22B3AD] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <span className="relative z-10 flex items-center gap-2">
+                    Join Community <ArrowRight size={16} />
+                  </span>
+                </button>
               </div>
             </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </motion.header>
+          </>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 

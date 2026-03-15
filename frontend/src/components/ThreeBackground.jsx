@@ -9,7 +9,7 @@ const ParticleUniverse = () => {
 
   // Generate 2000 particles in a spherical distribution
   const [positions, colors] = useMemo(() => {
-    const particleCount = 1500;
+    const particleCount = 3000;
     const positions = new Float32Array(particleCount * 3);
     const colors = new Float32Array(particleCount * 3);
 
