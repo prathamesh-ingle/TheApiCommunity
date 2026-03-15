@@ -3,14 +3,16 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const sendViaBrevo = async(to,subject,htmlContent)=>{
+  console.log("Checking API Key:", process.env.BREVO_API_KEY ? "KEY EXISTS" : "UNDEFINED ❌");
     const response=await fetch("https://api.brevo.com/v3/smtp/email",{
         method:"POST",
         headers:{
             "api-key":process.env.BREVO_API_KEY,
-            "Content-Type":"appliaction/json",
+            "Content-Type": "application/json", // 🚨 TYPO FIXED HERE
+            "Accept": "application/json"
         },
         body:JSON.stringify({
-            sender:{name:"API Community",email:process.env.GMAIL_USER},
+            sender:{name:"API community",email:process.env.GMAIL_USER},
             to:[{email:to}],
             subject:subject,
             htmlContent:htmlContent,
