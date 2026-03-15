@@ -10,14 +10,35 @@ import userRoutes from "./src/routes/user.routes.js";
 import connectDB from "./lib/db.js";
 
 const app = express();
+
+// 🚨 REQUIRED for Render to send/receive secure cookies
 app.set("trust proxy", 1);
 
+// 🔥 Restoring your robust array-based CORS setup
+const allowedOrigins = [
+  "http://localhost:5173", 
+  "https://theapicommunity.vercel.app" // Ensure there is NO trailing slash here
+];
+
+// Add FRONTEND_URL from Render env variables if it exists
+if (process.env.FRONTEND_URL) {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+}
+
 // Middleware
-app.use(cors({
-  // Automatically uses your Vercel URL in production, or localhost when testing locally
-  origin: process.env.FRONTEND_URL || "http://localhost:5173", 
-  credentials: true, // 🚨 REQUIRED for the backend to send/receive HttpOnly cookies
-}));
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin or if the origin is in our allowed list
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true, // This is mandatory to allow cookies to pass through
+  })
+);
 
 app.use(cookieParser());
 app.use(express.json());
