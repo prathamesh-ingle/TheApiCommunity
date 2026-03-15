@@ -44,11 +44,6 @@ const Footer = () => {
                   Our Speakers
                 </Link>
               </li>
-              <li>
-                <Link to="/admin/login" className="hover:text-[#0A7294]">
-                  Admin Portal
-                </Link>
-              </li>
             </ul>
           </div>
 
@@ -63,13 +58,8 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/blog" className="hover:text-[#0A7294]">
-                  Tech Blog
-                </Link>
-              </li>
-              <li>
-                <Link to="/contact" className="hover:text-[#0A7294]">
-                  Contact Support
+                <Link to="/team" className="hover:text-[#0A7294]">
+                  Team
                 </Link>
               </li>
             </ul>
@@ -87,7 +77,7 @@ const Footer = () => {
                 <Twitter size={17} />
               </a>
               <a
-                href="#"
+                href="https://www.linkedin.com/company/theapicommunity/posts/?feedView=all"
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-600 shadow-sm transition-all hover:bg-[#0A7294] hover:text-white"
               >
                 <Linkedin size={17} />
