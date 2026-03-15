@@ -10,6 +10,7 @@ import userRoutes from "./src/routes/user.routes.js";
 import connectDB from "./lib/db.js";
 
 const app = express();
+app.set("trust proxy", 1);
 
 // Middleware
 app.use(cors({

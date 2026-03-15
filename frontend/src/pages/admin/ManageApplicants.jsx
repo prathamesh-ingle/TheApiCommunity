@@ -176,8 +176,8 @@ const ManageApplicants = () => {
                       return (
                         <motion.tr 
                           layout
-                          initial={{ opacity: 0, opacity: 0 }} 
-                          animate={{ opacity: 1, opacity: 1 }} 
+                          initial={{ opacity: 0 }} 
+                          animate={{ opacity: 1 }} 
                           exit={{ opacity: 0, scale: 0.95 }}
                           transition={{ duration: 0.2 }}
                           key={app._id} 
@@ -218,8 +218,6 @@ const ManageApplicants = () => {
                               </div>
                             </div>
                           </td>
-
-                          
 
                         </motion.tr>
                       );
